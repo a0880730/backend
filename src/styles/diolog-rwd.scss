@@ -1,0 +1,11 @@
+.dialog-rwd{
+  .el-dialog{
+    margin-top: 30px !important;
+    width: 60%;
+
+    @include MQ(d1024) {
+      margin-top: 0px !important;
+      width: 100%;
+    }
+  }
+}
