@@ -16,6 +16,19 @@
             highlight-current-row
             style="width: 100%;"
           >
+            <el-table-column align="center" :label="`商品`">
+              <template slot-scope="scope">
+                <span>{{ getSroreProductInfo(scope.row['product_id']).name + " - " + getSroreProductInfo(scope.row['product_id']).specification }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column align="center" :label="`出貨數量`">
+              <template slot-scope="scope">
+                <span :class="[{ danger_txt: scope.row['quantity'] > getSroreProductInfo(scope.row['product_id']).quantity && getSroreProductInfo(scope.row['product_id']).quantity_minimum != -1 }]">{{ scope.row["quantity"] }}<br>
+                  <span v-if="getSroreProductInfo(scope.row['product_id']).quantity_minimum != -1" class="stock_txt">(庫存:{{ getSroreProductInfo(scope.row["product_id"]).quantity }})</span>
+                </span>
+              </template>
+            </el-table-column>
+
             <template v-for="(item, index) in ShippingItem">
               <template v-if="item.list >= 0">
                 <!--99:操作按鈕-->
@@ -28,16 +41,6 @@
                     </template>
                   </template>
                 </el-table-column>
-                <el-table-column v-else-if="index == 'product_id'" :key="index" align="center" :label="item.label">
-                  <template slot-scope="scope">
-                    <span>{{ getSroreProductInfo(scope.row[index]).name + " - " + getSroreProductInfo(scope.row[index]).specification }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column v-else :key="index" align="center" :label="item.label">
-                  <template slot-scope="scope">
-                    <span>{{ scope.row[index] }}</span>
-                  </template>
-                </el-table-column>
               </template>
             </template>
           </el-table>
@@ -48,20 +51,20 @@
         </el-row>
         <el-row style="text-align:center;margin-top:30px;">
           <el-button v-if="mode == 'creat'" class="filter-item" type="primary" @click="submitShipping()">
-            送出
+            確定出貨
           </el-button>
         </el-row>
       </el-col>
       <el-col :span="16" style="padding-left:20px">
         <el-row>
           <el-col :span="24" style="text-align:center;font-size:24px;margin-bottom:30px;">
-            查看石膏專數量計算表
+            查看石膏磚數量計算表
           </el-col>
         </el-row>
-        <el-row>
+        <el-row type="flex" justify="center">
           <el-radio-group v-model="birckIndex">
             <template v-for="(item,index) in BrickList">
-              <el-radio-button :key="index" :label="index">
+              <el-radio-button v-if="getUserInfo(item.applicant)" :key="index" :label="index">
                 {{ "填表人："+getUserInfo(item.applicant).username }}
                 <div class="brick-date">{{ item.created_at | dateFormat }}</div>
               </el-radio-button>
@@ -110,7 +113,7 @@
 
 <script>
 import { getProductInfo } from '@/api/product'
-import { getBrick, newCaseShipping, getCaseShippingItem } from '@/api/caseField'
+import { getBrick } from '@/api/caseField'
 import { mapState, mapGetters } from 'vuex'
 
 export default {
@@ -150,8 +153,11 @@ export default {
     }
   },
   watch: {
-    birckIndex(value) {
-      this.getBrick(this.BrickList[value].brick_id)
+    birckIndex: {
+      handler: function(val) {
+        this.getBrick(this.BrickList[val].brick_id)
+      },
+      deep: true
     }
   },
   created() {
@@ -167,7 +173,8 @@ export default {
       this.getShipping()
       // Add Button listener
       this.ShippingItem.CtrlBtn = { label: '操作', list: 99, width: '230px', button: [
-        { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick }
+        { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick },
+        { label: '刪除', type: 'danger', size: 'mini', callMethod: this.removeItemClick }
       ]
       }
       this.mode = 'creat'
@@ -176,13 +183,11 @@ export default {
   },
   methods: {
     getBrick(brick_id = null) {
-      console.log(brick_id)
       this.listLoading = true
       var paras = {}
       paras.case_id = this.$route.query.caseId
       paras.brick_id = brick_id
       getBrick(paras).then((response) => {
-        console.log(response)
         if (brick_id == null) {
           this.BrickList = response.data
         } else {
@@ -197,22 +202,19 @@ export default {
       getProductInfo(paras).then((response) => {
         const productData = []
         for (const i in response.data) {
+          if (response.data[i].quantity_minimum === -1) continue
           var item = {}
           item.value = response.data[i].product_id
           item.label = response.data[i].name + ' - ' + response.data[i].specification
+          // if (response.data[i].quantity_minimum === -1) {
+          //   item.note = '不扣庫存'
+          // } else {
+          item.note = '庫存:' + response.data[i].quantity
+          // }
           productData.push(item)
         }
         this.ShippingItem.product_id.selectData = productData
       })
-    },
-    getShipping() {
-      // TODO 取得出貨詳細未實作
-      // var paras = {}
-      // paras.case_id = this.$route.query.caseId
-      // getCaseShippingItem(paras).then(response => {
-      //   this.ShippingData = response.data
-      //   this.list = [...this.ShippingData.items]
-      // })
     },
     newItemClick() {
       var dialogData = {}
@@ -234,6 +236,10 @@ export default {
       dialogData.rules = this.ShippingItemRules
       dialogData.submitEvent = this.updateData
       this.dialogData = dialogData
+    },
+    removeItemClick(sope) {
+      const index = sope.$index
+      this.list.splice(index, 1)
     },
     newData(paras) {
       for (const i in paras) {
@@ -263,15 +269,16 @@ export default {
       paras.case_id = this.$route.query.caseId
       paras.items = [...this.list]
       paras.notes = this.notes
-      newCaseShipping(paras).then(response => {
-        // 回到案場
-        this.$router.replace('/caseField/info/' + this.$route.query.caseId)
-        this.$notify({
-          title: '成功',
-          message: '資料新增成功',
-          type: 'success',
-          duration: 2000
-        })
+      this.$store.dispatch('caseField/newCaseShipping', paras).then((response) => {
+        if (typeof response.notify === 'object') {
+          this.$notify(response.notify)
+        }
+        if (response.code === 201) {
+          // 回到案場
+          this.$router.replace('/caseField/info/' + this.$route.query.caseId)
+        }
+      }).catch(() => {
+        this.$notify({ title: '失敗', message: '資料新增失敗', type: 'error', duration: 2000 })
       })
     }
   }
@@ -304,5 +311,13 @@ export default {
   margin-top: 5px;
   font-size: 14px;
   color: #AAA;
+}
+
+.stock_txt{
+  color: rgb(98, 98, 98);
+}
+.danger_txt{
+  color: #FF0000;
+  font-weight: bold;
 }
 </style>

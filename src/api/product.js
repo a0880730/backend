@@ -79,12 +79,19 @@ export function purchaseProduct(data) {
 // 取得商品庫存紀錄
 export function getProductRecord(paras) {
   var searchId = ''
-  if (paras.page !== null && paras.page_size !== null) {
-    var dataQuery = new URLSearchParams(paras).toString()
-    searchId += '?' + dataQuery
-  }
+  var dataQuery = new URLSearchParams(paras).toString()
+  searchId += '?' + dataQuery
   return request({
     url: '/product/record' + searchId,
     method: 'get'
+  })
+}
+
+// 新增商品進貨紀錄 (進貨單)
+export function postProductPurchase(data) {
+  return request({
+    url: '/product/purchase',
+    method: 'post',
+    data
   })
 }

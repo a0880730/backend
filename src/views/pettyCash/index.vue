@@ -1,18 +1,13 @@
 <template>
   <div class="app-container">
-
-    <FilterContainer
-      :table-format="tableFormat"
-      :list-query.sync="listQuery"
-      :nwe-btn="newItemClick"
-      @get-list="getList"
-    />
+    <div class="filter-container">
+      <el-button class="filter-item" type="primary" icon="el-icon-edit" @click="newPettyCashClick()">儲值</el-button>
+    </div>
 
     <TableList
       :list="list"
       :list-loading="listLoading"
       :table-format="tableFormat"
-      @editItemClick="editItemClick"
     />
     <pagination
       v-show="total > 0"
@@ -26,14 +21,13 @@
 </template>
 
 <script>
-import { getCustomerInfo } from '@/api/customer'
+
+import { getPettyCashList } from '@/api/pettyCash'
 import { mapState, mapGetters } from 'vuex'
 
 export default {
-  name: 'CustomerList',
+  name: 'CaseField',
   components: {},
-  filters: {
-  },
   data() {
     return {
       list: null,
@@ -43,24 +37,30 @@ export default {
         page: 1,
         page_size: 20
       },
+      tableFormat: {},
       dialogData: {}
     }
   },
   computed: {
     ...mapState({
-      CustomerData: state => state.customer.CustomerData,
-      rules: state => state.customer.rules
+      PettyCashData: state => state.pettyCash.PettyCashData
     }),
     ...mapGetters([
-      'defaultData'
+      'defaultData',
+      'getUserInfo'
     ])
   },
   created() {
-    this.tableFormat = this.CustomerData
-    // Add Button listener
-    this.tableFormat.CtrlBtn = { label: '操作', list: 99, width: '230px', button: [
-      { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick }
-    ]
+    this.tableFormat = this.PettyCashData
+    this.tableFormat.applicant.showMethod = (data) => {
+      if (data.applicant != null) {
+        return this.getUserInfo(data.applicant).username
+      } else {
+        return ''
+      }
+    }
+    this.tableFormat.case_id.showMethod = (data) => {
+      return data.caseName
     }
     this.getList()
   },
@@ -69,56 +69,49 @@ export default {
       this.listLoading = true
       var paras = {}
       paras = Object.assign({}, this.listQuery)
-      getCustomerInfo(paras).then((response) => {
+      getPettyCashList(paras).then(async(response) => {
+        for (const i in response.data) {
+          response.data[i].caseName = ''
+        }
+
         this.list = response.data
         this.total = response.pages.total_records
+
+        const caseFieldParas = {
+          page: 1,
+          page_size: 20
+        }
+
+        for (const i in this.list) {
+          if (this.list[i].case_id === '') continue
+          caseFieldParas.case_id = this.list[i].case_id
+          const accessRoutes = await this.$store.dispatch('caseField/getInfo', caseFieldParas)
+          this.list[i].caseName = accessRoutes.data.name
+        }
         this.listLoading = false
       })
     },
-    newItemClick() {
+    newPettyCashClick() {
       var dialogData = {}
       dialogData.dialogName = '新增'
       dialogData.tableFormat = this.tableFormat
       dialogData.dialogFormVisible = true
-      dialogData.temp = this.defaultData(this.CustomerData)
+      dialogData.temp = this.defaultData(this.PettyCashData)
       dialogData.rules = this.rules
       dialogData.submitEvent = this.newData
       this.dialogData = dialogData
     },
-    editItemClick(sope) {
-      var dialogData = {}
-      dialogData.dialogName = '編輯'
-      dialogData.tableFormat = this.tableFormat
-      dialogData.dialogFormVisible = true
-      dialogData.temp = { ...sope.row }
-      dialogData.rules = this.rules
-      dialogData.submitEvent = this.updateData
-      this.dialogData = dialogData
-    },
     // 新增資料
     newData(paras) {
-      this.$store.dispatch('customer/newData', paras)
+      this.$store.dispatch('pettyCash/newPettyCash', paras)
         .then(() => {
-          // 重新取得清單
+          // 重新取得
           this.getList()
           this.dialogData.dialogFormVisible = false
           this.$notify({ title: '成功', message: '資料新增成功', type: 'success', duration: 2000 })
         })
         .catch(() => {
           this.$notify({ title: '失敗', message: '資料新增失敗', type: 'error', duration: 2000 })
-        })
-    },
-    // 更新資料
-    updateData(paras) {
-      this.$store.dispatch('customer/updateData', paras)
-        .then(() => {
-          // 重新取得清單
-          this.getList()
-          this.dialogData.dialogFormVisible = false
-          this.$notify({ title: '成功', message: '資料更新成功', type: 'success', duration: 2000 })
-        })
-        .catch(() => {
-          this.$notify({ title: '失敗', message: '資料更新失敗', type: 'error', duration: 2000 })
         })
     }
   }

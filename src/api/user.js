@@ -23,11 +23,61 @@ export function getInfo(paras) {
   })
 }
 
+// 新增管理員
 export function newUser(data) {
   return request({
     url: '/user',
     method: 'post',
     data
+  })
+}
+
+// 修改管理員
+export function updateUser(data) {
+  if (data.user_id == null) return
+  const user_id = data.user_id
+  delete data.user_id
+  return request({
+    url: '/user/' + user_id,
+    method: 'patch',
+    data
+  })
+}
+
+// 取得行事曆
+export function getCalendar(data) {
+  var dataQuery = new URLSearchParams(data).toString()
+  return request({
+    url: '/calendar?' + dataQuery,
+    method: 'get'
+  })
+}
+
+// 新增行事曆事件
+export function postCalendar(data) {
+  return request({
+    url: '/calendar',
+    method: 'post',
+    data
+  })
+}
+
+// 修改行事曆事件
+export function updateCalendar(data) {
+  const calendar_event_id = data.calendar_event_id
+  delete data.calendar_event_id
+  return request({
+    url: '/calendar/' + calendar_event_id,
+    method: 'patch',
+    data
+  })
+}
+
+// 刪除行事曆事件
+export function deleteCalendar(data) {
+  return request({
+    url: '/calendar/' + data.calendar_event_id,
+    method: 'delete'
   })
 }
 

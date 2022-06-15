@@ -8,7 +8,6 @@ import Layout from '@/layout'
 
 /* Router Modules */
 
-// import permission from './modules/permission'
 import customer from './modules/customer'
 import product from './modules/product'
 import caseField from './modules/caseField'
@@ -109,12 +108,39 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
-  // permission,
   customer,
   product,
   caseField,
   personnel,
   backend,
+  {
+    path: '/pettyCash',
+    component: Layout,
+    redirect: '/pettyCash/index',
+    title: '零用金',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/pettyCash/index'),
+        meta: { title: '零用金', icon: 'el-icon-coin', noCache: true }
+      }
+    ]
+    // hidden: true
+  },
+  {
+    path: '/calendar',
+    component: Layout,
+    redirect: '/calendar/index',
+    title: '行事曆',
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/calendar/index'),
+        meta: { title: '行事曆', icon: 'el-icon-date', noCache: true }
+      }
+    ]
+    // hidden: true
+  },
   report,
   exportPage,
 

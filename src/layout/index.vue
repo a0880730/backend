@@ -55,23 +55,25 @@ export default {
       }
     }
   },
-  created() {
+  async created() {
     // 取得管理員放在全域store
-    this.getUserDataToStore()
+    await this.getUserDataToStore()
     // 取得商品放在全域store
-    this.getPorductDataToStore()
+    await this.getPorductDataToStore()
+    // 零用金餘額
+    this.$store.dispatch('pettyCash/getPettyCash')
   },
   methods: {
     handleClickOutside() {
       this.$store.dispatch('app/closeSideBar', { withoutAnimation: false })
     },
-    getPorductDataToStore() {
+    async getPorductDataToStore() {
       const paras = { ...this.listQuery }
-      this.$store.dispatch('product/getProductInfo', paras)
+      await this.$store.dispatch('product/getProductInfo', paras)
     },
-    getUserDataToStore() {
+    async getUserDataToStore() {
       const paras = { ...this.listQuery }
-      this.$store.dispatch('user/getUserList', paras)
+      await this.$store.dispatch('user/getUserList', paras)
     },
     showTitle() {
       if (this.$route.path === '/dashboard') {

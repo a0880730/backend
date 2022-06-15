@@ -22,17 +22,20 @@
         </el-button>
       </el-col>
     </el-row>
-    <EditDialog :dialog-data="dialogData" />
+    <QutationEditDialog :dialog-data="dialogData" />
   </div>
 </template>
 
 <script>
+import QutationEditDialog from './components/QutationEditDialog.vue'
 import { getQuotation } from '@/api/caseField'
 import { mapState, mapGetters } from 'vuex'
 
 export default {
   name: 'Quatation',
-  components: {},
+  components: {
+    QutationEditDialog
+  },
   data() {
     return {
       list: [],
@@ -46,13 +49,15 @@ export default {
       dialogData: {},
       editRowIndex: null,
       quotationData: {},
+      productData: [],
       mode: 'creat' // creat: 新增,read 查看,update 更新(目前沒有)
     }
   },
   computed: {
     ...mapState({
       QuotationItem: state => state.caseField.QuotationItem,
-      rules: state => state.caseField.QuotationItemRules
+      rules: state => state.caseField.QuotationItemRules,
+      ProductInfo: state => state.product.productDataList
     }),
     ...mapGetters([
       'defaultData'
@@ -65,8 +70,18 @@ export default {
       return count
     }
   },
+  watch: {
+    ProductInfo: {
+      handler(value) {
+        this.getProductData()
+      },
+      deep: true
+    }
+  },
   created() {
     this.list = []
+    this.getProductData()
+    this.QuotationItem.name.querySearch = this.querySearch
     if (this.$route.params.pathMatch !== 'new') {
       this.mode = 'read'
       this.getList()
@@ -94,6 +109,12 @@ export default {
         //   this.total = response.pages.total_records
         this.listLoading = false
       })
+    },
+    getProductData() {
+      this.productData = []
+      for (const i in this.ProductInfo) {
+        this.productData.push(this.ProductInfo[i])
+      }
     },
     newItemClick() {
       var dialogData = {}
@@ -155,6 +176,17 @@ export default {
             duration: 2000
           })
         })
+    },
+    querySearch(queryString, cb) {
+      // const results = this.productData
+      var results = queryString ? this.productData.filter(this.createFilter(queryString)) : this.productData
+      console.log(results)
+      cb(results)
+    },
+    createFilter(queryString) {
+      return (data) => {
+        return (data.name.toLowerCase().indexOf(queryString.toLowerCase()) === 0)
+      }
     }
   }
 }

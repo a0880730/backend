@@ -158,3 +158,33 @@ export function newCaseShipping(paras) {
     data
   })
 }
+
+// 取得雜支
+export function getMiscList(paras) {
+  const case_id = paras.case_id
+  delete paras.case_id
+  if (case_id == null) return false
+  var searchId = ''
+  if (paras.page !== null && paras.page_size !== null) {
+    var dataQuery = new URLSearchParams(paras).toString()
+    searchId += '?' + dataQuery
+  }
+  return request({
+    url: '/case/' + case_id + '/misc' + searchId,
+    method: 'get'
+  })
+}
+
+// 新增雜支紀錄
+export function newCaseMisc(paras) {
+  const case_id = paras.case_id
+  delete paras.case_id
+  if (case_id == null) return false
+  var data = paras
+  return request({
+    url: '/case/' + case_id + '/misc',
+    method: 'post',
+    data
+  })
+}
+

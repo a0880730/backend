@@ -23,7 +23,7 @@ const state = {
     'avatar': { label: '大頭照', default: '' },
     'username': { label: '帳號', list: 0, edit: 0, default: '', search: 1 },
     'password': { label: '密碼', type: 'password', edit: 0, default: '' },
-    'role': { label: '權限', list: 3, edit: 3, default: 'admin',
+    'role': { label: '權限', list: 3, edit: 2, default: 'admin',
       colType: {
         data: ['admin', 'user']
       }
@@ -32,7 +32,7 @@ const state = {
     'status': { label: '狀態', list: 1, edit: 1, default: 1, search: 2,
       colType: {
         data: {
-          0: '禁用',
+          // 0: '禁用',
           1: '啟用',
           2: '封鎖'
         },
@@ -49,6 +49,37 @@ const state = {
     // password: [{ required: true, message: '密碼為必填', trigger: 'change' }],
     display_name: [{ required: true, message: '名稱為必填', trigger: 'change' }],
     status: [{ required: true, message: '狀態為必填', trigger: 'change' }]
+  },
+  CalendarData: {
+    'calendar_event_id': { label: 'id', default: '' },
+    'name': { label: '待辦事項', edit: 0, default: '' },
+    'assign_for': { label: '指派給', edit: 7, default: '', selectData: '' },
+    'color': { label: '底色', edit: 8, default: '#4299e1', colType: {
+      data: {
+        '#4299e1': '#4299e1',
+        '#38b2ac': '#38b2ac',
+        '#e53e3e': '#38b2ac',
+        '#ed8936': '#ed8936',
+        '#ed64a6': '#ed64a6'
+      }
+    }
+    },
+    'start_at': { label: '時間', edit: 6, default: '' },
+    'end_at': { label: '結束時間', default: '' },
+    'notes': { label: '備註', edit: 0, default: '', type: 'textarea' }
+  },
+  CalendarDataRules: {
+    'name': [{ required: true, message: '待辦事項為必填', trigger: 'change' }],
+    'assign_for': [{ required: true, message: '人員為必填', trigger: 'change' }],
+    'start_at': [{ required: true, message: '時間為必填', trigger: 'change' }]
+  },
+  // 權限
+  PermissionData: {
+    name: { label: '群組名稱', list: 0, edit: 0, default: '' },
+    tag: { label: '標籤', list: 0, default: 'view' },
+    allow_method: { label: '允許權限', list: 0, edit: 0, default: ['GET'] },
+    allow_path: { label: '允許權限', list: 0, edit: 0, default: '' },
+    notes: { label: '備註', list: 0, edit: 0, default: '' }
   }
 }
 

@@ -20,7 +20,14 @@ const state = {
       }
     },
     'unit_price': { label: '單價', list: 0, edit: 0, type: 'number', default: '0' },
-    'quantity_minimum': { label: '庫存下限', list: 0, edit: 0, type: 'number', default: 1 },
+    'quantity_minimum': { label: '計算庫存', list: 0, edit: 1, default: '1',
+      colType: {
+        data: {
+          '-1': '不計算庫存',
+          '1': '計算庫存'
+        }
+      }
+    },
     'quantity': { label: '庫存', list: 0 },
     'notes': { label: '備註', list: 0, edit: 0, default: '' },
     'status': { label: '狀態' }
@@ -42,7 +49,7 @@ const state = {
   ProductTypeData: {
     'type_id': { label: 'ID', default: null },
     'name': { label: '名稱', list: 0, edit: 0, default: '' },
-    'specName': { label: '名稱', edit: 0 },
+    'specName': { label: '規格', list: -1, edit: 0 },
     'specification': { label: '規格', list: 4, default: '',
       colType: {
         nameKey: 'name'
@@ -56,9 +63,14 @@ const state = {
   // 進出貨
   PurchaseData: {
     'product_id': { label: 'ID', default: null },
-    'cost_price': { label: '單價', edit: 0, default: '0' },
-    'quantity_add': { label: '數量', edit: 0, type: 'number', default: '0' },
+    'cost_price': { label: '單價', edit: 0, type: 'number', default: 0 },
+    'quantity': { label: '數量', edit: 0, type: 'number', default: 1 },
     'notes': { label: '備註', edit: 0, default: '' }
+  },
+
+  PurchaseDataRules: {
+    cost_price: [{ min: 0, type: 'number', message: '單價錯誤', trigger: 'change' }],
+    quantity: [{ min: 1, type: 'number', message: '數量必須大於0', trigger: 'change' }]
   },
 
   // 庫存
@@ -71,7 +83,7 @@ const state = {
     'quantity': { label: '數量', list: 0, type: 'number', default: 0 },
     'notes': { label: '備註', list: 0, default: '' },
     'created_at': { label: '建立時間', list: 6, default: '', search: 6 }
-  },
+  }
 }
 
 const mutations = {
@@ -107,7 +119,15 @@ const actions = {
   newData({ commit, state }, paras) {
     return new Promise((resolve, reject) => {
       newData(paras).then(response => {
-        resolve()
+        const callback = { ...response }
+        if (response.code === 201) {
+          callback.notify = { title: '成功', message: '資料新增成功', type: 'success', duration: 2000 }
+        } else if (response.code === 400) {
+          callback.notify = { title: '失敗', message: '資料格式錯誤', type: 'error', duration: 2000 }
+        } else {
+          callback.notify = { title: '失敗', message: '錯誤:' + response.code, type: 'error', duration: 2000 }
+        }
+        resolve(callback)
       }).catch(error => {
         reject(error)
       })
@@ -118,7 +138,15 @@ const actions = {
   updateData({ commit, state }, paras) {
     return new Promise((resolve, reject) => {
       updateData(paras).then(response => {
-        resolve()
+        const callback = { ...response }
+        if (response.code === 201) {
+          callback.notify = { title: '成功', message: '資料新增成功', type: 'success', duration: 2000 }
+        } else if (response.code === 400) {
+          callback.notify = { title: '失敗', message: '資料格式錯誤', type: 'error', duration: 2000 }
+        } else {
+          callback.notify = { title: '失敗', message: '錯誤:' + response.code, type: 'error', duration: 2000 }
+        }
+        resolve(callback)
       }).catch(error => {
         reject(error)
       })
@@ -151,7 +179,15 @@ const actions = {
   purchaseProduct({ commit, state }, paras) {
     return new Promise((resolve, reject) => {
       purchaseProduct(paras).then(response => {
-        resolve()
+        const callback = { ...response }
+        if (response.code === 201) {
+          callback.notify = { title: '成功', message: '資料新增成功', type: 'success', duration: 2000 }
+        } else if (response.code === 400) {
+          callback.notify = { title: '失敗', message: '資料格式錯誤', type: 'error', duration: 2000 }
+        } else {
+          callback.notify = { title: '失敗', message: '錯誤:' + response.code, type: 'error', duration: 2000 }
+        }
+        resolve(callback)
       }).catch(error => {
         reject(error)
       })

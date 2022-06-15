@@ -33,7 +33,6 @@
 
 <script>
 import { getBrick } from '@/api/caseField'
-
 import { mapGetters } from 'vuex'
 
 export default {

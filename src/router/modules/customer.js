@@ -20,7 +20,7 @@ const companyRouter = {
       name: 'listCustomer',
       meta: {
         title: '客戶列表',
-        roles: ['admin']
+        roles: ['admin', 'editor']
       }
     }
   ]

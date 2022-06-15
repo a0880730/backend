@@ -12,7 +12,7 @@
     </el-table-column>
     <el-table-column label="金額" min-width="30%" align="center">
       <template slot-scope="scope">
-        {{ countAmount(scope.row.items) }}
+        {{ countAmount(scope.row.items) | toThousandFilter }}
       </template>
     </el-table-column>
     <el-table-column label="操作" min-width="15%" align="center">
@@ -74,11 +74,10 @@ export default {
       return sum
     },
     toQuotationInfo(scope) {
-      this.$router.replace('/caseField/quotation/' + scope.row.quotation_id + '?caseId=01737bab-2ad5-4c69-811b-61d941f4e518')
+      this.$router.replace('/caseField/quotation/' + scope.row.quotation_id + '?caseId=' + this.caseId)
     },
     toQuotationPrint(scope) {
-      // this.$router.replace('/printQuotation/' + scope.row.quotation_id + '?caseId=01737bab-2ad5-4c69-811b-61d941f4e518')
-      window.open('#/printQuotation/' + scope.row.quotation_id + '?caseId=01737bab-2ad5-4c69-811b-61d941f4e518', '_blank')
+      window.open('#/printQuotation/' + scope.row.quotation_id + '?caseId=' + this.caseId, '_blank')
     }
   }
 }

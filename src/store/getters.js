@@ -11,6 +11,7 @@ const getters = {
   introduction: state => state.user.introduction,
   roles: state => state.user.roles,
   permission_routes: state => state.permission.routes,
+  async_routes: state => state.permission.asyncRoutes,
   errorLogs: state => state.errorLog.logs,
 
   // 取得資料預設值設定
@@ -26,12 +27,29 @@ const getters = {
 
   // 取得會員名稱
   getUserInfo: state => (id) => {
+    if (typeof state.user.PersonnelDataList[id] === 'undefined') {
+      return { username: '' }
+    }
     return state.user.PersonnelDataList[id]
   },
 
   // 取得商品名稱
   getSroreProductInfo: state => (id) => {
     return state.product.productDataList[id]
+  },
+
+  // 時間轉換RFC3339
+  timeToRFC: state => (String) => {
+    const date = new Date(String)
+    const y = date.getFullYear()
+    const m = date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1)
+    const d = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
+    const hh = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
+    const mm = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+    const ss = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds()
+    let dateString = y + '-' + m + '-' + d + ' ' + hh + ':' + mm + ':' + ss
+    dateString = dateString.replace(/\s+/g, 'T') + '+08:00'
+    return dateString
   }
 
 }

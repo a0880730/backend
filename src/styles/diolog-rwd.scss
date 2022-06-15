@@ -1,9 +1,9 @@
 .dialog-rwd{
   .el-dialog{
     margin-top: 30px !important;
-    width: 60%;
+    width: 40%;
 
-    @include MQ(d1024) {
+    @include MQ(t768) {
       margin-top: 0px !important;
       width: 100%;
     }

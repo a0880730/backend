@@ -58,6 +58,12 @@ Vue.component('EditDialog', EditDialog)
 import TableList from '@/components/TableList'
 Vue.component('TableList', TableList)
 
+import VCalendar from 'v-calendar' // 引入日曆插件
+
+Vue.use(VCalendar, {
+  componentPrefix: 'v'
+})
+
 new Vue({
   el: '#app',
   router,

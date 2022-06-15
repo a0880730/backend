@@ -1,12 +1,13 @@
-import { getInfo, newData, updateData, getQuotation, newQuotation, getBrick, newBrick, deleteBrick } from '@/api/caseField'
+import { getInfo, newData, updateData, getQuotation, newQuotation, getBrick, newBrick, deleteBrick, newCaseShipping, newCaseMisc } from '@/api/caseField'
 
 const state = {
+
   // 案場
   CaseFieldData: {
     'case_id': { label: 'ID', default: null },
     'name': { label: '名稱', list: 0, edit: 0, default: '', search: 1 },
-    'customer_id': { label: '客戶', list: 9, edit: 6, default: '', showMethod: '', selectData: '' },
-    'contractor_id': { label: '包商', list: 9, edit: 6, default: '', showMethod: '', selectData: '' },
+    'customer_id': { label: '客戶', list: 9, edit: 7, default: '', showMethod: '', selectData: '' },
+    'contractor_id': { label: '包商', list: 9, edit: 7, default: '', showMethod: '', selectData: '' },
     'address': { label: '地址', list: 0, edit: 0, default: '', search: 1 },
     'notes': { label: '備註', list: 0, edit: 0, default: '' }
   },
@@ -19,7 +20,7 @@ const state = {
 
   // 報價單item
   QuotationItem: {
-    'name': { label: '施工內容', list: 0, edit: 0, default: '' },
+    'name': { label: '施工內容', list: 0, edit: 9, default: '', selectData: '' },
     'specification': {
       label: '規格', list: 0, edit: 0, default: '',
       colType: {
@@ -60,18 +61,48 @@ const state = {
   },
   // 進出貨
   ShippingItem: {
-    'product_id': { label: '商品', list: 1, edit: 6, default: '' },
-    'quantity': { label: '數量', list: 1, edit: 0, default: null }
+    'product_id': { label: '商品', list: 1, edit: 7, default: '' },
+    'quantity': { label: '數量', list: 1, edit: 0, default: '0' }
   },
-  // 進出貨
   ShippingItemRules: {
     'product_id': [{ required: true, message: '商品為必填', trigger: 'change' }],
     'quantity': [{ required: true, message: '數量為必填', trigger: 'change' }]
-  }
+  },
+  // 零用金
+  MiscData: {
+    'name': { label: '雜支項目', edit: 0, default: '' },
+    'amount': { label: '金額', edit: 0, default: '0' },
+    'petty_cash': { label: '扣零用金', edit: 1, default: 0,
+      colType: {
+        data: {
+          0: '不扣零用金',
+          1: '扣零用金'
+        },
+        followKey: 'type'
+      }
+    }
+  },
+  MiscDataRules: {
+    'name': [{ required: true, message: '雜支項目為必填', trigger: 'change' }],
+    'amount': [{ required: true, message: '金額為必填', trigger: 'change' }],
+    'petty_cash': [{ required: true, message: '此欄為必填', trigger: 'change' }]
+  },
+  // 回收進貨
+  PurchaseData: {
+    'product_id': { label: '產品', edit: 7, default: '' },
+    'quantity': { label: '數量', edit: 0, type: 'number', default: '' },
+    'cost_price': { label: '回收單價', edit: 0, type: 'number', default: '' }
+  },
+  PurchaseDataRules: {
+    'product_id': [{ required: true, message: '商品為必填', trigger: 'change' }],
+    'quantity': [{ required: true, message: '數量為必填', trigger: 'change' },
+      { min: 1, type: 'number', message: '數量必須大於0', trigger: 'change' }],
+    'cost_price': [{ required: true, message: '回收單價為必填', trigger: 'change' },
+      { min: 1, type: 'number', message: '回收單價必須大於0', trigger: 'change' }]
+  },
 }
 
 const mutations = {
-
 }
 
 const actions = {
@@ -79,7 +110,7 @@ const actions = {
   getInfo({ commit, state }, paras) {
     return new Promise((resolve, reject) => {
       getInfo(paras).then(response => {
-        resolve()
+        resolve(response)
       }).catch(error => {
         reject(error)
       })
@@ -152,6 +183,40 @@ const actions = {
     return new Promise((resolve, reject) => {
       deleteBrick(paras).then(response => {
         resolve()
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+
+  // 新增出貨紀錄
+  newCaseShipping({ commit, state }, paras) {
+    return new Promise((resolve, reject) => {
+      newCaseShipping(paras).then(response => {
+        const callback = { ...response }
+        if (response.code === 201) {
+          callback.notify = { title: '成功', message: '資料新增成功', type: 'success', duration: 2000 }
+        } else if (callback.code === 409) {
+          callback.notify = { title: '失敗', message: '商品庫存不足', type: 'error', duration: 2000 }
+        }
+        resolve(callback)
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+
+  // 新增雜支項目
+  newCaseMisc({ dispatch }, paras) {
+    return new Promise((resolve, reject) => {
+      newCaseMisc(paras).then(response => {
+        const callback = { ...response }
+        if (response.code === 201) {
+          callback.notify = { title: '成功', message: '資料新增成功', type: 'success', duration: 2000 }
+        } else if (response.code === 409) {
+          callback.notify = { title: '失敗', message: '零用金餘額不足', type: 'error', duration: 2000 }
+        }
+        resolve(callback)
       }).catch(error => {
         reject(error)
       })

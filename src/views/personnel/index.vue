@@ -27,7 +27,7 @@
 
 <script>
 // TODO 管理員權限
-import { getInfo } from '@/api/user'
+import { getInfo, newUser, updateUser } from '@/api/user'
 import { mapState, mapGetters } from 'vuex'
 
 export default {
@@ -89,14 +89,14 @@ export default {
       dialogData.dialogName = '編輯'
       dialogData.tableFormat = this.tableFormat
       dialogData.dialogFormVisible = true
-      dialogData.temp = sope.row
+      dialogData.temp = { ...sope.row }
       dialogData.rules = this.rules
       dialogData.submitEvent = this.updateData
       this.dialogData = dialogData
     },
     // 新增資料
     newData(paras) {
-      this.$store.dispatch('customer/newData', paras)
+      newUser(paras)
         .then(() => {
           // 重新取得清單
           this.getList()
@@ -109,7 +109,7 @@ export default {
     },
     // 更新資料
     updateData(paras) {
-      this.$store.dispatch('customer/updateData', paras)
+      updateUser(paras)
         .then(() => {
           // 重新取得清單
           this.getList()

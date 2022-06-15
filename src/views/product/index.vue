@@ -47,7 +47,8 @@ export default {
     ...mapState({
       ProductData: state => state.product.ProductData,
       PurchaseData: state => state.product.PurchaseData,
-      rules: state => state.product.ProductRules
+      rules: state => state.product.ProductRules,
+      PurchaseDataRules: state => state.product.PurchaseDataRules
     }),
     ...mapGetters([
       'defaultData'
@@ -108,7 +109,7 @@ export default {
       dialogData.dialogName = '編輯'
       dialogData.tableFormat = this.tableFormat
       dialogData.dialogFormVisible = true
-      dialogData.temp = sope.row
+      dialogData.temp = { ...sope.row }
       dialogData.rules = this.rules
       dialogData.submitEvent = this.updateData
       this.dialogData = dialogData
@@ -122,7 +123,7 @@ export default {
       dialogData.tableFormat = this.PurchaseData
       dialogData.dialogFormVisible = true
       dialogData.temp = Object.assign({}, purchaseDefault)
-      dialogData.rules = {}
+      dialogData.rules = this.PurchaseDataRules
       dialogData.submitEvent = this.purchaseProduct
       this.dialogData = dialogData
     },
@@ -130,16 +131,15 @@ export default {
     newData(paras) {
       paras = this.sendBeforProcess(paras)
       this.$store.dispatch('product/newData', paras)
-        .then(() => {
-          // 重新取得清單
-          this.getList()
-          this.dialogData.dialogFormVisible = false
-          this.$notify({
-            title: '成功',
-            message: '資料新增成功',
-            type: 'success',
-            duration: 2000
-          })
+        .then((response) => {
+          if (typeof response.notify === 'object') {
+            this.$notify(response.notify)
+          }
+          if (response.code === 201) {
+            // 重新取得清單
+            this.getList()
+            this.dialogData.dialogFormVisible = false
+          }
         })
         .catch(() => {
           this.$notify({
@@ -154,53 +154,29 @@ export default {
     updateData(paras) {
       paras = this.sendBeforProcess(paras)
       this.$store.dispatch('product/updateData', paras)
-        .then(() => {
-          // 重新取得清單
-          this.getList()
-          this.dialogData.dialogFormVisible = false
-          this.$notify({
-            title: '成功',
-            message: '資料更新成功',
-            type: 'success',
-            duration: 2000
-          })
-        })
-        .catch(() => {
-          this.$notify({
-            title: '失敗',
-            message: '資料更新失敗',
-            type: 'error',
-            duration: 2000
-          })
+        .then((response) => {
+          if (typeof response.notify === 'object') {
+            this.$notify(response.notify)
+          }
         })
     },
-    // 更新資料
+    // 進出貨
     purchaseProduct(paras) {
-      paras.quantity = paras.quantity_add
-      delete paras.quantity_add
+      paras.quantity = paras.quantity + ''
+      paras.cost_price = paras.cost_price + ''
       this.$store.dispatch('product/purchaseProduct', paras)
-        .then(() => {
-          // 重新取得清單
-          this.getList()
-          this.dialogData.dialogFormVisible = false
-          this.$notify({
-            title: '成功',
-            message: '資料更新成功',
-            type: 'success',
-            duration: 2000
-          })
-        })
-        .catch(() => {
-          this.$notify({
-            title: '失敗',
-            message: '資料更新失敗',
-            type: 'error',
-            duration: 2000
-          })
+        .then((response) => {
+          if (typeof response.notify === 'object') {
+            this.$notify(response.notify)
+          }
+          if (response.code === 201) {
+            this.dialogData.dialogFormVisible = false
+          }
         })
     },
     sendBeforProcess(paras) {
       paras.quantity_minimum = paras.quantity_minimum * 1
+      paras.unit_price = paras.unit_price + ''
       return paras
     }
   }
