@@ -75,8 +75,8 @@ const state = {
   },
   // 權限
   PermissionData: {
+    permission_tag: { label: '權限標籤', list: 0, edit: 0, default: '' },
     name: { label: '群組名稱', list: 0, edit: 0, default: '' },
-    tag: { label: '標籤', list: 0, default: 'view' },
     allow_method: { label: '允許權限', list: 0, edit: 0, default: ['GET'] },
     allow_path: { label: '允許權限', list: 0, edit: 0, default: '' },
     notes: { label: '備註', list: 0, edit: 0, default: '' }

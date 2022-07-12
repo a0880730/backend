@@ -54,6 +54,12 @@ export default {
       default() {
         return ''
       }
+    },
+    brickCount: {
+      type: Number,
+      default() {
+        return 0
+      }
     }
   },
   data() {
@@ -75,6 +81,10 @@ export default {
       paras.case_id = this.caseId
       getBrick(paras).then(response => {
         this.list = response.data
+        // 總數
+        if (this.list != null) {
+          this.$emit('update:brickCount', this.list.length)
+        }
       })
     },
     toBrickInfo(scope) {

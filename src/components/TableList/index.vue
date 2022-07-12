@@ -36,6 +36,13 @@
           </template>
         </el-table-column>
 
+        <!--7:千分號類型-->
+        <el-table-column v-else-if="item.list === 7" :key="index" align="center" :label="item.label" :width="item.width">
+          <template slot-scope="scope">
+            <span>{{ scope.row[index] | toThousandFilter }}</span>
+          </template>
+        </el-table-column>
+
         <!--9:自寫方法類型-->
         <el-table-column v-else-if="item.list === 9" :key="index" align="center" :label="item.label">
           <template slot-scope="scope">

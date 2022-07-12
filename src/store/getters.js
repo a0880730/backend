@@ -44,13 +44,12 @@ const getters = {
     const y = date.getFullYear()
     const m = date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1)
     const d = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
-    const hh = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
+    const hh = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
     const mm = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
     const ss = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds()
     let dateString = y + '-' + m + '-' + d + ' ' + hh + ':' + mm + ':' + ss
     dateString = dateString.replace(/\s+/g, 'T') + '+08:00'
     return dateString
   }
-
 }
 export default getters

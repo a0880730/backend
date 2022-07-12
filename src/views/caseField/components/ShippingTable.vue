@@ -54,6 +54,12 @@ export default {
       default() {
         return ''
       }
+    },
+    shippingCount: {
+      type: Number,
+      default() {
+        return 0
+      }
     }
   },
   data() {
@@ -87,10 +93,14 @@ export default {
           const shippingDetail = await getProductRecord(paras)
           this.list[i].shippingDetail = shippingDetail.data
         }
+        // 總數
+        if (this.list != null) {
+          this.$emit('update:shippingCount', this.list.length)
+        }
       })
     },
     show(a) {
-      console.log(a)
+      // console.log(a)
     }
     // toShippingInfo(scope) {
     //   this.$router.replace('/caseField/shipping/' + scope.row.batch_id + '?caseId=' + this.caseId)

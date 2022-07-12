@@ -1,4 +1,4 @@
-import { getInfo, newData, updateData, getQuotation, newQuotation, getBrick, newBrick, deleteBrick, newCaseShipping, newCaseMisc } from '@/api/caseField'
+import { getInfo, newData, updateData, getQuotation, newQuotation, getBrick, newBrick, deleteBrick, newCaseShipping, newCaseMisc, newReceipts } from '@/api/caseField'
 
 const state = {
 
@@ -100,6 +100,15 @@ const state = {
     'cost_price': [{ required: true, message: '回收單價為必填', trigger: 'change' },
       { min: 1, type: 'number', message: '回收單價必須大於0', trigger: 'change' }]
   },
+
+  // 收款
+  ReceiptsData: {
+    'receipts': { label: '收款金額', edit: 0, type: 'number', default: '' },
+    'notes': { label: '備註', edit: 0, default: '' }
+  },
+  ReceiptsDataRules: {
+    'receipts': [{ required: true, message: '收款金額為必填', trigger: 'change' }]
+  }
 }
 
 const mutations = {
@@ -215,6 +224,23 @@ const actions = {
           callback.notify = { title: '成功', message: '資料新增成功', type: 'success', duration: 2000 }
         } else if (response.code === 409) {
           callback.notify = { title: '失敗', message: '零用金餘額不足', type: 'error', duration: 2000 }
+        }
+        resolve(callback)
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+
+  // 新增收款項目
+  newReceipts(paras) {
+    return new Promise((resolve, reject) => {
+      newReceipts(paras).then(response => {
+        const callback = { ...response }
+        if (response.code === 201) {
+          callback.notify = { title: '成功', message: '資料新增成功', type: 'success', duration: 2000 }
+        } else if (response.code === 409) {
+          callback.notify = { title: '失敗', message: '錯誤:' + response.code, type: 'error', duration: 2000 }
         }
         resolve(callback)
       }).catch(error => {

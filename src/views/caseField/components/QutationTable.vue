@@ -48,6 +48,12 @@ export default {
       default() {
         return ''
       }
+    },
+    sumQutation: {
+      type: Number,
+      default() {
+        return 0
+      }
     }
   },
   data() {
@@ -64,6 +70,14 @@ export default {
       paras.case_id = this.caseId
       getQuotation(paras).then(response => {
         this.list = response.data
+        // 加總
+        let sum = 0
+        if (this.list != null) {
+          for (const i in this.list) {
+            sum += this.countAmount(this.list[i].items) * 1
+          }
+        }
+        this.$emit('update:sumQutation', sum)
       })
     },
     countAmount(data) {

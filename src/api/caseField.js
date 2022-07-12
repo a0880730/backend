@@ -188,3 +188,41 @@ export function newCaseMisc(paras) {
   })
 }
 
+// 取得收款紀錄
+export function getReceipts(paras) {
+  const case_id = paras.case_id
+  delete paras.case_id
+  if (case_id == null) return false
+  var searchId = ''
+  if (paras.page !== null && paras.page_size !== null) {
+    var dataQuery = new URLSearchParams(paras).toString()
+    searchId += '?' + dataQuery
+  }
+  return request({
+    url: '/case/' + case_id + '/receipts' + searchId,
+    method: 'get'
+  })
+}
+
+// 新增收款紀錄
+export function newReceipts(paras) {
+  const case_id = paras.case_id
+  delete paras.case_id
+  var data = paras
+  return request({
+    url: '/case/' + case_id + '/receipts',
+    method: 'post',
+    data
+  })
+}
+
+// 刪除收款紀錄
+export function deleteReceipt(paras) {
+  const case_id = paras.case_id
+  delete paras.case_id
+  const receipts_id = paras.receipts_id
+  return request({
+    url: '/case/' + case_id + '/receipts/' + receipts_id,
+    method: 'delete'
+  })
+}
