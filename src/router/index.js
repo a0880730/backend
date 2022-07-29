@@ -118,11 +118,13 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/pettyCash/index',
     title: '零用金',
+    name: 'PettyCashMain',
     children: [
       {
         path: 'index',
         component: () => import('@/views/pettyCash/index'),
-        meta: { title: '零用金', icon: 'el-icon-coin', noCache: true }
+        meta: { title: '零用金', icon: 'el-icon-coin', noCache: true },
+        name: 'PettyCash'
       }
     ]
     // hidden: true
@@ -132,11 +134,13 @@ export const asyncRoutes = [
     component: Layout,
     redirect: '/calendar/index',
     title: '行事曆',
+    name: 'CalendarMain',
     children: [
       {
         path: 'index',
         component: () => import('@/views/calendar/index'),
-        meta: { title: '行事曆', icon: 'el-icon-date', noCache: true }
+        meta: { title: '行事曆', icon: 'el-icon-date', noCache: true },
+        name: 'Calendar'
       }
     ]
     // hidden: true

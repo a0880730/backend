@@ -23,9 +23,9 @@ const state = {
     'avatar': { label: '大頭照', default: '' },
     'username': { label: '帳號', list: 0, edit: 0, default: '', search: 1 },
     'password': { label: '密碼', type: 'password', edit: 0, default: '' },
-    'role': { label: '權限', list: 3, edit: 2, default: 'admin',
+    'role': { label: '權限', list: 3, edit: 2, default: '',
       colType: {
-        data: ['admin', 'user']
+        data: []
       }
     },
     'display_name': { label: '名稱', list: 0, edit: 0, default: '', search: 1 },
@@ -48,7 +48,8 @@ const state = {
     username: [{ required: true, message: '帳號為必填', trigger: 'change' }],
     // password: [{ required: true, message: '密碼為必填', trigger: 'change' }],
     display_name: [{ required: true, message: '名稱為必填', trigger: 'change' }],
-    status: [{ required: true, message: '狀態為必填', trigger: 'change' }]
+    status: [{ required: true, message: '狀態為必填', trigger: 'change' }],
+    role: [{ required: true, message: '權限為必填', trigger: 'change' }]
   },
   CalendarData: {
     'calendar_event_id': { label: 'id', default: '' },
@@ -136,7 +137,6 @@ const actions = {
         if (!data) {
           reject('Verification failed, please Login again.')
         }
-
         const { role } = data
 
         // roles must be a non-empty array

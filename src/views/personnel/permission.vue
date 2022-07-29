@@ -1,11 +1,11 @@
 <template>
   <div class="app-container">
-    <el-button type="primary" @click="handleAddRole">新增角色</el-button>
+    <el-button type="primary" @click="handleAddPermission">新增權限</el-button>
 
     <el-table :data="rolesList" style="width: 100%;margin-top:30px;" border>
-      <el-table-column align="center" label="角色標籤" width="220">
+      <el-table-column align="center" label="群組標籤" width="220">
         <template slot-scope="scope">
-          {{ scope.row.role_tag }}
+          {{ scope.row.permission_tag }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="角色名稱" width="220">
@@ -33,12 +33,11 @@
 
     <el-dialog :visible.sync="dialogVisible" :title="dialogType==='edit'?'編輯權限':'新增權限'" :close-on-click-modal="false">
       <el-form :model="role" label-width="80px" label-position="left">
-        <el-form-item label="角色標籤">
-          <el-input v-if="dialogType==='new'" v-model="role.role_tag" placeholder="角色標籤" />
-          <label v-if="dialogType==='edit'">{{ role.role_tag }}</label>
+        <el-form-item label="權限標籤">
+          <el-input v-model="role.permission_tag" placeholder="" />
         </el-form-item>
-        <el-form-item label="角色名稱">
-          <el-input v-model="role.name" placeholder="角色名稱" />
+        <el-form-item label="權限名稱">
+          <el-input v-model="role.name" placeholder="Role Name" />
         </el-form-item>
         <el-form-item label="備註">
           <el-input
@@ -73,7 +72,7 @@ import { deepClone } from '@/utils'
 import { mapState, mapGetters } from 'vuex'
 
 import { getPermission, addPermission, updatePermission, deletePermission } from '@/api/role'
-import { getRole, addRole, updateRole, deleteRole } from '@/api/role'
+import { getRole } from '@/api/role'
 
 export default {
   name: 'Role',
@@ -82,7 +81,6 @@ export default {
       role: {},
       routes: [],
       rolesList: [],
-      permissionList: [],
       dialogVisible: false,
       dialogType: 'new',
       defaultProps: {
@@ -122,25 +120,11 @@ export default {
       }
       return res
     },
-    async getRole() {
-      const res = await getRole()
-      this.rolesList = [...res.data]
-      for (const role of this.rolesList) {
-        role.permission = []
-        for (const permissionTag of role.allow_permissions) {
-          role.permission.push(this.permissionList[permissionTag])
-        }
-      }
-    },
     async getPermission() {
       const res = await getPermission()
-      this.permissionList = {}
-      for (const item of res.data) {
-        this.permissionList[item.permission_tag] = item
-      }
-      this.getRole()
+      this.rolesList = res.data
     },
-    handleAddRole() {
+    handleAddPermission() {
       this.role = this.defaultData(this.PermissionData)
       if (this.$refs.tree) {
         this.$refs.tree.setCheckedNodes([])
@@ -153,32 +137,45 @@ export default {
       this.dialogVisible = true
       this.role = deepClone(scope.row)
       this.$nextTick(() => {
-        const rolePermission = []
-        for (const permissionItem of this.role.permission) {
-          permissionItem.allow_path.map((item) => {
-            rolePermission.push({ 'name': item })
-          })
-        }
+        const rolePermission = this.role.allow_path.map((item) => {
+          return { 'name': item }
+        })
         this.$refs.tree.setCheckedNodes(rolePermission)
       })
     },
     handleDelete({ $index, row }) {
-      this.$confirm('確定要刪除?', 'Warning', {
-        confirmButtonText: '確定',
-        cancelButtonText: '取消',
+      this.$confirm('Confirm to remove the role?', 'Warning', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning'
       })
         .then(async() => {
-          console.log(row)
-          await deleteRole(row)
-          if (typeof row.permission === 'object') {
-            row.permission.map(async(item) => {
-              await deletePermission(item)
-            })
-          }
+          await deletePermission(row)
           this.getPermission()
+          // this.rolesList.splice($index, 1)
+          // this.$message({
+          //   type: 'success',
+          //   message: 'Delete succed!'
+          // })
         })
         .catch(err => { console.error(err) })
+    },
+    generateTree(routes, basePath = '/', checkedKeys) {
+      const res = []
+
+      for (const route of routes) {
+        const routePath = path.resolve(basePath, route.path)
+
+        // recursive child routes
+        if (route.children) {
+          route.children = this.generateTree(route.children, routePath, checkedKeys)
+        }
+
+        if (checkedKeys.includes(routePath) || (route.children && route.children.length >= 1)) {
+          res.push(route)
+        }
+      }
+      return res
     },
     async confirmRole() {
       const checkedNodes = this.$refs.tree.getCheckedNodes()
@@ -186,68 +183,36 @@ export default {
       for (const i in checkedNodes) {
         routes.push(checkedNodes[i].name)
       }
+      this.role.allow_path = routes
+      this.role.allow_method = ['GET']
+      // this.role.routes = this.generateTree(deepClone(this.serviceRoutes), '/', checkedKeys)
+
       if (this.dialogType === 'edit') {
-        const paras = {
-          permission_id: this.role.permission[0].permission_id,
-          name: this.role.name,
-          allow_method: ['GET'],
-          allow_path: routes,
-          notes: ''
-        }
-        updatePermission(paras).then((response) => {
-          this.dialogVisible = false
-          if (response.code === 200) {
-            const _this = this
-            setTimeout(function() {
-              _this.addRole()
-            }, 50)
-          }
-        })
-      } else {
-        const paras = {
-          permission_tag: this.role.role_tag,
-          name: this.role.name,
-          allow_method: ['GET'],
-          allow_path: routes,
-          notes: ''
-        }
-        addPermission(paras).then((response) => {
-          this.dialogVisible = false
-          if (response.code === 201) {
-            const _this = this
-            setTimeout(function() {
-              _this.addRole()
-            }, 50)
-          }
-        })
-      }
-    },
-    addRole() {
-      if (this.dialogType === 'edit') {
-        const paras = {
-          name: this.role.name,
-          role_id: this.role.role_id,
-          allow_permissions: [this.role.role_tag],
-          notes: this.role.notes
-        }
-        updateRole(paras).then((response) => {
+        delete this.role.permission_tag
+        delete this.role.notes
+        updatePermission(this.role).then((response) => {
           this.getPermission()
-          this.$notify({ title: '成功', message: '資料修改成功', type: 'success', duration: 2000 })
           this.dialogVisible = false
         })
       } else {
-        const paras = {
-          name: this.role.name,
-          role_tag: this.role.role_tag,
-          allow_permissions: [this.role.role_tag],
-          notes: this.role.notes
-        }
-        addRole(paras).then((response) => {
+        addPermission(this.role).then((response) => {
           this.getPermission()
-          this.$notify({ title: '成功', message: '資料新增成功', type: 'success', duration: 2000 })
           this.dialogVisible = false
         })
       }
+
+      // const { notes, key, name } = this.role
+      // this.dialogVisible = false
+      // this.$notify({
+      //   title: 'Success',
+      //   dangerouslyUseHTMLString: true,
+      //   message: `
+      //       <div>Role Key: ${key}</div>
+      //       <div>Role Name: ${name}</div>
+      //       <div>notes: ${notes}</div>
+      //     `,
+      //   type: 'success'
+      // })
     },
     // reference: src/view/layout/components/Sidebar/SidebarItem.vue
     onlyOneShowingChild(children = [], parent) {

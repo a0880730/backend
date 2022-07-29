@@ -1,8 +1,10 @@
 import request from '@/utils/request'
 
-export function getPermission() {
+export function getPermission(paras) {
+  var dataQuery = new URLSearchParams(paras).toString()
+  const search = '?' + dataQuery
   return request({
-    url: '/permission',
+    url: '/permission' + search,
     method: 'get'
   })
 }

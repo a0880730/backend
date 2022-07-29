@@ -5,6 +5,7 @@
         <el-descriptions class="margin-top" :title="caseFieldData.name" :column="3" border>
           <template slot="extra">
             <el-button type="info" @click="recycleBrick()">餘料回收</el-button>
+            <el-button type="danger" icon="el-icon-delete" circle @click="deleteCaseField()" />
           </template>
           <el-descriptions-item>
             <template slot="label">
@@ -366,6 +367,28 @@ export default {
           _this.showTableIndex = index
         }, 500)
       }
+    },
+    // 刪除案場
+    deleteCaseField() {
+      this.$confirm('此操作將永久刪除該筆資料，確定繼續?', '提示', {
+        confirmButtonText: '確定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const paras = {}
+        paras.case_id = this.$route.params.pathMatch
+        this.$store.dispatch('caseField/deleteCaseField', paras)
+          .then(() => {
+            // 重新取得清單
+            this.$notify({
+              title: '成功',
+              message: '資料刪除成功',
+              type: 'success',
+              duration: 2000
+            })
+            this.$router.replace('/caseField/list')
+          })
+      })
     }
   }
 }

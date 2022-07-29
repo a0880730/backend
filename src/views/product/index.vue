@@ -158,6 +158,10 @@ export default {
           if (typeof response.notify === 'object') {
             this.$notify(response.notify)
           }
+          if (response.code === 200) {
+            this.getList()
+            this.dialogData.dialogFormVisible = false
+          }
         })
     },
     // 進出貨

@@ -30,6 +30,13 @@ export function updateData(data) {
   })
 }
 
+export function deleteCaseField(data) {
+  return request({
+    url: '/case/' + data.case_id,
+    method: 'delete'
+  })
+}
+
 // 取得報價單
 export function getQuotation(paras) {
   // var searchId = ''

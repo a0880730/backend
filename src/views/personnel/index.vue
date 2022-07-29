@@ -26,9 +26,9 @@
 </template>
 
 <script>
-// TODO 管理員權限
 import { getInfo, newUser, updateUser } from '@/api/user'
 import { mapState, mapGetters } from 'vuex'
+import { getRole } from '@/api/role'
 
 export default {
   name: 'PersonnelList',
@@ -61,9 +61,19 @@ export default {
       { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick }
     ]
     }
+    this.getRole()
     this.getList()
   },
   methods: {
+    getRole() {
+      getRole().then((response) => {
+        this.tableFormat.role.colType.data = []
+        for (const item of response.data) {
+          if (item.role_tag === 'admin') continue
+          this.tableFormat.role.colType.data.push(item.role_tag)
+        }
+      })
+    },
     getList() {
       this.listLoading = true
       var paras = {}

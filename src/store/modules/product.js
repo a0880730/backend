@@ -139,7 +139,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       updateData(paras).then(response => {
         const callback = { ...response }
-        if (response.code === 201) {
+        if (response.code === 200) {
           callback.notify = { title: '成功', message: '資料新增成功', type: 'success', duration: 2000 }
         } else if (response.code === 400) {
           callback.notify = { title: '失敗', message: '資料格式錯誤', type: 'error', duration: 2000 }

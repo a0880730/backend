@@ -1,4 +1,4 @@
-import { getInfo, newData, updateData, getQuotation, newQuotation, getBrick, newBrick, deleteBrick, newCaseShipping, newCaseMisc, newReceipts } from '@/api/caseField'
+import { getInfo, newData, updateData, deleteCaseField, getQuotation, newQuotation, getBrick, newBrick, deleteBrick, newCaseShipping, newCaseMisc, newReceipts } from '@/api/caseField'
 
 const state = {
 
@@ -146,6 +146,17 @@ const actions = {
       })
     })
   },
+  // delete 案場
+  deleteCaseField({ commit, state }, paras) {
+    return new Promise((resolve, reject) => {
+      deleteCaseField(paras).then(response => {
+        resolve()
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+
   // 取得報價單
   getQuotation({ commit, state }, paras) {
     return new Promise((resolve, reject) => {

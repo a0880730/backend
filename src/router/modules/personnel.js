@@ -15,15 +15,6 @@ const personnelRouter = {
   },
   children: [
     {
-      path: 'role',
-      component: () => import('@/views/personnel/role'),
-      name: 'RolePermission',
-      meta: {
-        title: '權限設定',
-        roles: ['admin']
-      }
-    },
-    {
       path: 'list',
       component: () => import('@/views/personnel/index'),
       name: 'listPersonnel',
@@ -31,7 +22,25 @@ const personnelRouter = {
         title: '人員列表',
         roles: ['admin']
       }
+    },
+    {
+      path: 'role',
+      component: () => import('@/views/personnel/role'),
+      name: 'RolePermission',
+      meta: {
+        title: '角色權限',
+        roles: ['admin']
+      }
     }
+    // {
+    //   path: 'permission',
+    //   component: () => import('@/views/personnel/permission'),
+    //   name: 'Permission',
+    //   meta: {
+    //     title: '權限群組',
+    //     roles: ['admin']
+    //   }
+    // }
     // {
     //   path: 'count-salary',
     //   component: () => import('@/views/personnel/index'),

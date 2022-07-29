@@ -34,13 +34,14 @@ router.beforeEach(async(to, from, next) => {
       } else {
         try {
           // get user info
-          // note: roles must be a object array! such as: ['admin'] or ,['developer','editor']
+          // note: roles must be a +object array! such as: ['admin'] or ,['developer','editor']
           const jwtInfo = VueJwtDecode.decode(hasToken)
           await store.dispatch('user/getInfo', { 'userId': jwtInfo.id })
           const roles = store.getters.roles
+          // 取得使用者權限
+          const permission = await store.dispatch('permission/getPermission', roles)
           // generate accessible routes map based on roles
-          const accessRoutes = await store.dispatch('permission/generateRoutes', roles)
-
+          const accessRoutes = await store.dispatch('permission/generateRoutes', permission)
           // dynamically add accessible routes
           router.addRoutes(accessRoutes)
 
