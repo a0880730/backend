@@ -190,8 +190,8 @@
 </template>
 
 <script>
-import { getProductInfo, postProductPurchase } from '@/api/product'
-import { newReceipts } from '@/api/caseField'
+import { getProductInfo, postProductPurchase, getProductRecord } from '@/api/product'
+import { newReceipts, getCaseShipping } from '@/api/caseField'
 import QutationTable from './components/QutationTable.vue'
 import BrickTable from './components/BrickTable.vue'
 import ShippingTable from './components/ShippingTable.vue'
@@ -224,12 +224,13 @@ export default {
       },
       miscReloadSw: false,
       receiptsReloadSw: false,
-      sumQutation: 0,
-      shippingCount: 0,
-      brickCount: 0,
-      sumPettyCash: 0,
-      sumReceipts: 0,
-      showTableIndex: 0
+      sumQutation: 0, // 報價單總額
+      shippingCount: 0, // 出貨次數
+      brickCount: 0, // 記算表張數
+      sumPettyCash: 0, // 雜支總和
+      sumReceipts: 0, // 收款總額
+      showTableIndex: 0, // 顯示table index
+      recycleProduct: {} // 可回收商品
     }
   },
   computed: {
@@ -248,7 +249,8 @@ export default {
   },
   created() {
     this.getList()
-    this.getProductInfo()
+    // 取得出貨紀錄(為了知道餘料回收時該顯示那些商品)
+    this.getCaseShipping()
   },
   methods: {
     getList() {
@@ -260,18 +262,47 @@ export default {
         this.caseFieldData = response.data
       })
     },
-    // 取得商品列表
+    // 取得出貨紀錄
+    getCaseShipping() {
+      var paras = {}
+      paras.case_id = this.$route.params.pathMatch
+      getCaseShipping(paras).then(async(response) => {
+        for (const i in response.data) {
+          // response.data[i].shippingDetail = []
+          const paras = {}
+          paras.page_size = 200
+          paras.page = 1
+          paras.batch_id = response.data[i].batch_id
+          // 詳細資料查詢
+          const shippingDetail = await getProductRecord(paras)
+          for (const item of shippingDetail.data) {
+            console.log(item)
+            if (typeof this.recycleProduct[item.product_id] === 'undefined') {
+              this.recycleProduct[item.product_id] = item.quantity
+            } else {
+              this.recycleProduct[item.product_id] += item.quantity
+            }
+          }
+          this.getProductInfo()
+        }
+      })
+    },
+    // 取得商品列表(餘料回收用)
     getProductInfo() {
       this.listLoading = true
       var paras = {}
       getProductInfo(paras).then((response) => {
         const productData = []
         for (const i in response.data) {
+          // 不計庫存的
           if (response.data[i].quantity_minimum === -1) continue
+          // 沒出過貨的
+          console.log(response.data[i].product_id)
+          if (typeof this.recycleProduct[response.data[i].product_id] === 'undefined') continue
           var item = {}
           item.value = response.data[i].product_id
           item.label = response.data[i].name + ' - ' + response.data[i].specification
-          item.note = '庫存:' + response.data[i].quantity
+          item.note = '出貨數量:' + this.recycleProduct[response.data[i].product_id]
           productData.push(item)
         }
         this.PurchaseData.product_id.selectData = productData

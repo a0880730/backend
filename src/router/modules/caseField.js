@@ -14,15 +14,15 @@ const caseFieldRouter = {
     roles: ['admin', 'editor'] // you can set roles in root nav
   },
   children: [
-    // {
-    //   path: 'case-field-set',
-    //   component: () => import('@/views/caseField/case-field-set'),
-    //   name: 'caseFieldSet',
-    //   meta: {
-    //     title: '案場類型設定',
-    //     roles: ['admin']
-    //   }
-    // },
+    {
+      path: 'caseFieldSet',
+      component: () => import('@/views/caseField/caseFieldSet'),
+      name: 'caseFieldSet',
+      meta: {
+        title: '案場類型設定',
+        roles: ['admin']
+      }
+    },
     {
       path: 'list',
       component: () => import('@/views/caseField/index'),

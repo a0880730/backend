@@ -21,6 +21,7 @@
           <svg-icon icon-class="eye-open" />
         </el-button>
         <el-button type="info" icon="el-icon-printer" circle @click="toQuotationPrint(scope)" />
+        <el-button type="danger" icon="el-icon-delete" circle @click="deleteQuotation(scope)" />
       </template>
     </el-table-column>
   </el-table>
@@ -92,6 +93,29 @@ export default {
     },
     toQuotationPrint(scope) {
       window.open('#/printQuotation/' + scope.row.quotation_id + '?caseId=' + this.caseId, '_blank')
+    },
+    // 刪除報價單
+    deleteQuotation(scope) {
+      this.$confirm('確定要刪除?', 'Warning', {
+        confirmButtonText: '確定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async() => {
+          const paras = {}
+          paras.case_id = this.caseId
+          paras.quotation_id = scope.row.quotation_id
+          this.$store.dispatch('caseField/deleteQuotation', paras)
+            .then(() => {
+              // 重新取得清單
+              this.fetchData()
+              this.$notify({ title: '成功', message: '資料刪除成功', type: 'success', duration: 2000 })
+            })
+            .catch(() => {
+              this.$notify({ title: '失敗', message: '資料刪除失敗', type: 'error', duration: 2000 })
+            })
+        })
+        .catch(err => { console.error(err) })
     }
   }
 }

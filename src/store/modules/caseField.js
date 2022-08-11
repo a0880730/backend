@@ -1,6 +1,27 @@
-import { getInfo, newData, updateData, deleteCaseField, getQuotation, newQuotation, getBrick, newBrick, deleteBrick, newCaseShipping, newCaseMisc, newReceipts } from '@/api/caseField'
+import { getInfo, newData, updateData, deleteCaseField, getQuotation, newQuotation, deleteQuotation, getBrick, newBrick, deleteBrick, newCaseShipping, newCaseMisc, newReceipts, newBrickRange, updateBrickRange, deleteBrickRange } from '@/api/caseField'
 
 const state = {
+
+  // 案場施工級距
+  CaseBrickRange: {
+    'id': { label: 'ID', default: null },
+    'case_type': { label: '案場類型', list: 1, edit: 1, default: 1, colType: {
+      data: {
+        1: '裝修案',
+        2: '工地案'
+      }
+    }},
+    'name': { label: '級距名稱', list: 0, edit: 0, default: '' },
+    'construction_height_gt': { label: '高度(cm)', list: 0, edit: 0, type: 'number', default: '' },
+    'wage': { label: '計算起薪', list: 0, edit: 0, default: '' },
+    'notes': { label: '備註', list: 0, edit: 0, default: '' }
+  },
+  CaseBrickRangeRules: {
+    case_type: [{ required: true, message: '案場類型為必填', trigger: 'change' }],
+    name: [{ required: true, message: '名稱為必填', trigger: 'change' }],
+    construction_height_gt: [{ required: true, message: '施工高度為必填', trigger: 'change' }],
+    wage: [{ required: true, message: '計算起薪為必填', trigger: 'change' }]
+  },
 
   // 案場
   CaseFieldData: {
@@ -177,6 +198,16 @@ const actions = {
       })
     })
   },
+  // 刪除報價單
+  deleteQuotation({ commit, state }, paras) {
+    return new Promise((resolve, reject) => {
+      deleteQuotation(paras).then(response => {
+        resolve()
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
   // 取得規格表
   getBrick({ commit, state }, paras) {
     return new Promise((resolve, reject) => {
@@ -258,7 +289,46 @@ const actions = {
         reject(error)
       })
     })
-  }
+  },
+
+  // 新增案場施工級距
+  newBrickRange({ commit, state }, paras) {
+    return new Promise((resolve, reject) => {
+      newBrickRange(paras).then(response => {
+        const callback = { ...response }
+        if (response.code === 201) {
+          callback.notify = { title: '成功', message: '資料新增成功', type: 'success', duration: 2000 }
+        } else if (response.code === 409) {
+          callback.notify = { title: '失敗', message: '錯誤:' + response.code, type: 'error', duration: 2000 }
+        }
+        resolve(callback)
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+
+  // 修改案場施工級距
+  updateBrickRange({ commit, state }, paras) {
+    return new Promise((resolve, reject) => {
+      updateBrickRange(paras).then(response => {
+        resolve()
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+
+  // 刪除案場施工級距
+  deleteBrickRange({ commit, state }, paras) {
+    return new Promise((resolve, reject) => {
+      deleteBrickRange(paras).then(response => {
+        resolve()
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
 }
 
 export default {

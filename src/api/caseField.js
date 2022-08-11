@@ -73,6 +73,17 @@ export function newQuotation(paras) {
   })
 }
 
+// 刪除報價單
+export function deleteQuotation(paras) {
+  // 擷取案場ID
+  const case_id = paras.case_id
+  const quotation_id = paras.quotation_id
+  return request({
+    url: '/case/' + case_id + '/quotation/' + quotation_id,
+    method: 'delete'
+  })
+}
+
 // 取得規格表
 export function getBrick(paras) {
   // var searchId = ''
@@ -144,16 +155,6 @@ export function getCaseShipping(paras) {
     url: '/case/' + case_id + '/shipping' + searchId,
     method: 'get'
   })
-}
-
-// 取得案場出貨紀錄項目 - 未實作
-export function getCaseShippingItem(paras) {
-  // var data = paras
-  // return request({
-  //   url: '/product/shipping',
-  //   method: 'get',
-  //   data
-  // })
 }
 
 // 新增案場出貨紀錄
@@ -230,6 +231,46 @@ export function deleteReceipt(paras) {
   const receipts_id = paras.receipts_id
   return request({
     url: '/case/' + case_id + '/receipts/' + receipts_id,
+    method: 'delete'
+  })
+}
+
+// 取得案場級距
+export function getBrickRange(paras) {
+  return request({
+    url: '/personnel/cases/brickrange',
+    method: 'get'
+  })
+}
+
+// 新增案場級距
+export function newBrickRange(paras) {
+  var data = paras
+  return request({
+    url: '/personnel/cases/brickrange',
+    method: 'post',
+    data
+  })
+}
+
+// 修改案場級距
+export function updateBrickRange(paras) {
+  const range_id = paras.range_id
+  delete paras.range_id
+  var data = paras
+  return request({
+    url: `/personnel/cases/brickrange/${range_id}`,
+    method: 'patch',
+    data
+  })
+}
+
+// 刪除案場級距
+export function deleteBrickRange(paras) {
+  const range_id = paras.range_id
+  delete paras.range_id
+  return request({
+    url: `/personnel/cases/brickrange/${range_id}`,
     method: 'delete'
   })
 }
