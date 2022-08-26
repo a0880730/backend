@@ -88,7 +88,7 @@ export function getSalary(paras) {
   })
 }
 
-// 當月試算薪資test
+// 當月試算薪資123
 export function newSalary(data) {
   return request({
     url: '/personnel/salary/trial-balance',
