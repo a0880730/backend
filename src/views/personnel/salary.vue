@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import { getSalary, newSalary } from '@/api/user'
+import { getSalary, newSalary, patchSalary } from '@/api/user'
 import { mapState, mapGetters } from 'vuex'
 
 export default {
@@ -68,10 +68,10 @@ export default {
     firstDay.setSeconds(firstDay.getSeconds() - 1)
     this.tableFormat.end_at.default = this.timeToFormat(firstDay)
     // Add Button listener
-    // this.tableFormat.CtrlBtn = { label: '操作', list: 99, width: '230px', button: [
-    //   { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick }
-    // ]
-    // }
+    this.tableFormat.CtrlBtn = { label: '操作', list: 99, width: '230px', button: [
+      { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick }
+    ]
+    }
     this.getList()
   },
   methods: {
@@ -125,9 +125,9 @@ export default {
       newSalary(paras)
         .then((response) => {
           console.log(response)
-          // // 重新取得清單
-          // this.getList()
-          // this.dialogData.dialogFormVisible = false
+          // 重新取得清單
+          this.getList()
+          this.dialogData.dialogFormVisible = false
           this.$notify({ title: '成功', message: '資料新增成功', type: 'success', duration: 2000 })
         })
         .catch(() => {
@@ -136,16 +136,17 @@ export default {
     },
     // 更新資料
     updateData(paras) {
-      // updateUser(paras)
-      //   .then(() => {
-      //     // 重新取得清單
-      //     this.getList()
-      //     this.dialogData.dialogFormVisible = false
-      //     this.$notify({ title: '成功', message: '資料更新成功', type: 'success', duration: 2000 })
-      //   })
-      //   .catch(() => {
-      //     this.$notify({ title: '失敗', message: '資料更新失敗', type: 'error', duration: 2000 })
-      //   })
+      patchSalary(paras)
+        .then((response) => {
+          console.log(response)
+          // 重新取得清單
+          this.getList()
+          this.dialogData.dialogFormVisible = false
+          this.$notify({ title: '成功', message: '資料更新成功', type: 'success', duration: 2000 })
+        })
+        .catch(() => {
+          this.$notify({ title: '失敗', message: '資料更新失敗', type: 'error', duration: 2000 })
+        })
     }
   }
 }
