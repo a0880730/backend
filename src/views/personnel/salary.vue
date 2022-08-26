@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import { getSalary, newSalary, patchSalary } from '@/api/user'
+import { getSalary, newSalary, patchSalary, deleteSalary } from '@/api/user'
 import { mapState, mapGetters } from 'vuex'
 
 export default {
@@ -69,7 +69,8 @@ export default {
     this.tableFormat.end_at.default = this.timeToFormat(firstDay)
     // Add Button listener
     this.tableFormat.CtrlBtn = { label: '操作', list: 99, width: '230px', button: [
-      { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick }
+      { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick },
+      { label: '刪除', type: 'danger', size: 'mini', callMethod: this.removeItemClick }
     ]
     }
     this.getList()
@@ -147,6 +148,24 @@ export default {
         .catch(() => {
           this.$notify({ title: '失敗', message: '資料更新失敗', type: 'error', duration: 2000 })
         })
+    },
+    removeItemClick({ $index, row }) {
+      this.$confirm('確定要刪除?', 'Warning', {
+        confirmButtonText: '確定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async() => {
+          deleteSalary(row).then(() => {
+            // 重新取得清單
+            this.getList()
+            this.$notify({ title: '成功', message: '資料刪除成功', type: 'success', duration: 2000 })
+          })
+            .catch(() => {
+              this.$notify({ title: '失敗', message: '資料刪除失敗', type: 'error', duration: 2000 })
+            })
+        })
+        .catch(err => { console.error(err) })
     }
   }
 }
