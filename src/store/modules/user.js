@@ -89,11 +89,17 @@ const state = {
     allow_path: { label: '允許權限', list: 0, edit: 0, default: '' },
     notes: { label: '備註', list: 0, edit: 0, default: '' }
   },
+  // 薪水試算
+  trialSalaryData: {
+    month: { label: '月份', list: 1, edit: 6, default: '', dateType: 'month' },
+    start_at: { label: '起算時間', list: -1, edit: 6 },
+    end_at: { label: '結束時間', list: -1, edit: 6 }
+  },
   // 薪水
   salaryData: {
     user_id: { label: '人員', list: 1, edit: -1 },
     month: { label: '月份', list: 1, edit: 6, default: '', dateType: 'month' },
-    salary: { label: '薪資', list: 1, edit: -1, type: 'number' },
+    salary: { label: '薪資', list: 1, edit: 0, type: 'number' },
     created_at: { label: '新增時間', list: 1, edit: -1 },
     updated_at: { label: '修改時間', list: 1, edit: -1 },
     start_at: { label: '起算時間', list: -1, edit: 6 },

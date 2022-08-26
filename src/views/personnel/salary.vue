@@ -69,7 +69,7 @@ export default {
     this.tableFormat.end_at.default = this.timeToFormat(firstDay)
     // Add Button listener
     this.tableFormat.CtrlBtn = { label: '操作', list: 99, width: '230px', button: [
-      { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick },
+      { label: '查看', type: 'primary', size: 'mini', callMethod: this.jumpInfo },
       { label: '刪除', type: 'danger', size: 'mini', callMethod: this.removeItemClick }
     ]
     }
@@ -92,9 +92,12 @@ export default {
       })
     },
     newSalaryClick() {
+      const tbFormat = JSON.parse(JSON.stringify(this.tableFormat))
+      tbFormat.salary.edit = -1
+
       const dialogData = {}
       dialogData.dialogName = '新增'
-      dialogData.tableFormat = { ...this.tableFormat }
+      dialogData.tableFormat = tbFormat
       dialogData.dialogFormVisible = true
       dialogData.temp = this.defaultData(this.salaryData)
       dialogData.rules = this.rules
@@ -106,7 +109,7 @@ export default {
       if (sope.row.role === 'admin') {
         delete tbFormat['role']
       }
-      tbFormat.username.edit = 4
+
       const dialogData = {}
       dialogData.dialogName = '編輯'
       dialogData.tableFormat = { ...tbFormat }
@@ -136,19 +139,19 @@ export default {
         })
     },
     // 更新資料
-    updateData(paras) {
-      patchSalary(paras)
-        .then((response) => {
-          console.log(response)
-          // 重新取得清單
-          this.getList()
-          this.dialogData.dialogFormVisible = false
-          this.$notify({ title: '成功', message: '資料更新成功', type: 'success', duration: 2000 })
-        })
-        .catch(() => {
-          this.$notify({ title: '失敗', message: '資料更新失敗', type: 'error', duration: 2000 })
-        })
-    },
+    // updateData(paras) {
+    //   patchSalary(paras)
+    //     .then((response) => {
+    //       console.log(response)
+    //       // 重新取得清單
+    //       this.getList()
+    //       this.dialogData.dialogFormVisible = false
+    //       this.$notify({ title: '成功', message: '資料更新成功', type: 'success', duration: 2000 })
+    //     })
+    //     .catch(() => {
+    //       this.$notify({ title: '失敗', message: '資料更新失敗', type: 'error', duration: 2000 })
+    //     })
+    // },
     removeItemClick({ $index, row }) {
       this.$confirm('確定要刪除?', 'Warning', {
         confirmButtonText: '確定',
@@ -166,6 +169,9 @@ export default {
             })
         })
         .catch(err => { console.error(err) })
+    },
+    jumpInfo(sope) {
+      this.$router.push({ path: 'salary/salaryDetail/' + sope.row.case_id })
     }
   }
 }
