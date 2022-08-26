@@ -97,6 +97,7 @@ export function newSalary(data) {
   })
 }
 
+
 // 修改試算薪資
 export function patchSalary(data) {
   if (data.trialbalance_id == null) return
