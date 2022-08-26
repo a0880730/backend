@@ -88,11 +88,21 @@ export function getSalary(paras) {
   })
 }
 
-// 當月試算薪資123
+// 當月試算薪資
 export function newSalary(data) {
   return request({
     url: '/personnel/salary/trial-balance',
     method: 'get',
     data
+  })
+}
+
+// 刪除試算薪資
+export function deleteSalary(data) {
+  if (data.trialbalance_id == null) return
+  const trialbalance_id = data.user_id
+  return request({
+    url: `/personnel/salary/trial-balance/${trialbalance_id}`,
+    method: 'delete'
   })
 }
