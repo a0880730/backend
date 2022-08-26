@@ -276,11 +276,18 @@ export default {
           // 詳細資料查詢
           const shippingDetail = await getProductRecord(paras)
           for (const item of shippingDetail.data) {
-            console.log(item)
             if (typeof this.recycleProduct[item.product_id] === 'undefined') {
-              this.recycleProduct[item.product_id] = item.quantity
+              this.recycleProduct[item.product_id] = {}
+              this.recycleProduct[item.product_id].quantity = item.quantity * 1 // 數量
+              this.recycleProduct[item.product_id].cost_price = item.cost_price * 1 // 均價
             } else {
-              this.recycleProduct[item.product_id] += item.quantity
+              // 原來的成本總計
+              const beforPrice = this.recycleProduct[item.product_id].quantity * this.recycleProduct[item.product_id].cost_price
+              // 新的一批成本
+              const newPrice = (item.quantity * item.cost_price)
+              const avgPrice = Math.trunc((newPrice + beforPrice) / (this.recycleProduct[item.product_id].quantity * 1 + item.quantity * 1) * 10000) / 10000
+              this.recycleProduct[item.product_id].cost_price = avgPrice
+              this.recycleProduct[item.product_id].quantity += item.quantity * 1
             }
           }
           this.getProductInfo()
@@ -297,12 +304,11 @@ export default {
           // 不計庫存的
           if (response.data[i].quantity_minimum === -1) continue
           // 沒出過貨的
-          console.log(response.data[i].product_id)
           if (typeof this.recycleProduct[response.data[i].product_id] === 'undefined') continue
           var item = {}
           item.value = response.data[i].product_id
           item.label = response.data[i].name + ' - ' + response.data[i].specification
-          item.note = '出貨數量:' + this.recycleProduct[response.data[i].product_id]
+          item.note = '出貨數量:' + this.recycleProduct[response.data[i].product_id].quantity + '（成本:$' + this.recycleProduct[response.data[i].product_id].cost_price + '）'
           productData.push(item)
         }
         this.PurchaseData.product_id.selectData = productData

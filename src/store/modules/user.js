@@ -45,7 +45,14 @@ const state = {
     }
   },
   rules: {
-    username: [{ required: true, message: '帳號為必填', trigger: 'change' }],
+    username: [{ required: true, message: '帳號為必填', trigger: 'change' },
+      { min: 5, max: 20, message: '長度限制5~20個字', trigger: 'change' },
+      {
+        required: true,
+        pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9]+$/,
+        message: '帳號不支援特殊字符',
+        trigger: 'change'
+      }],
     // password: [{ required: true, message: '密碼為必填', trigger: 'change' }],
     display_name: [{ required: true, message: '名稱為必填', trigger: 'change' }],
     status: [{ required: true, message: '狀態為必填', trigger: 'change' }],
@@ -81,6 +88,16 @@ const state = {
     allow_method: { label: '允許權限', list: 0, edit: 0, default: ['GET'] },
     allow_path: { label: '允許權限', list: 0, edit: 0, default: '' },
     notes: { label: '備註', list: 0, edit: 0, default: '' }
+  },
+  // 薪水
+  salaryData: {
+    user_id: { label: '人員', list: 1, edit: -1 },
+    month: { label: '月份', list: 1, edit: 6, default: '', dateType: 'month' },
+    salary: { label: '薪資', list: 1, edit: -1, type: 'number' },
+    created_at: { label: '新增時間', list: 1, edit: -1 },
+    updated_at: { label: '修改時間', list: 1, edit: -1 },
+    start_at: { label: '起算時間', list: -1, edit: 6 },
+    end_at: { label: '結束時間', list: -1, edit: 6 }
   }
 }
 

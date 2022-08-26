@@ -86,7 +86,11 @@ export default {
           if (this.list[i].case_id === '') continue
           caseFieldParas.case_id = this.list[i].case_id
           const accessRoutes = await this.$store.dispatch('caseField/getInfo', caseFieldParas)
-          this.list[i].caseName = accessRoutes.data.name
+          if (accessRoutes.code === 200) {
+            this.list[i].caseName = accessRoutes.data.name
+          } else {
+            this.list[i].caseName = '該案場不存在'
+          }
         }
         this.listLoading = false
       })

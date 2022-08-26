@@ -38,6 +38,18 @@ const getters = {
     return state.product.productDataList[id]
   },
 
+  // 時間轉換YYYY-MM-DD HH:II:SS
+  timeToFormat: state => (String) => {
+    const date = new Date(String)
+    const y = date.getFullYear()
+    const m = date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1)
+    const d = date.getDate() < 10 ? '0' + date.getDate() : date.getDate()
+    const hh = date.getHours() < 10 ? '0' + date.getHours() : date.getHours()
+    const mm = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+    const ss = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds()
+    return y + '-' + m + '-' + d + ' ' + hh + ':' + mm + ':' + ss
+  },
+
   // 時間轉換RFC3339
   timeToRFC: state => (String) => {
     const date = new Date(String)

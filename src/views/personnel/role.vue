@@ -13,11 +13,6 @@
           {{ scope.row.name }}
         </template>
       </el-table-column>
-      <!-- <el-table-column align="center" label="權限" width="220">
-        <template slot-scope="scope">
-          {{ scope.row.allow_path }}
-        </template>
-      </el-table-column> -->
       <el-table-column align="header-center" label="備註">
         <template slot-scope="scope">
           {{ scope.row.notes }}
@@ -25,8 +20,8 @@
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
-          <el-button type="primary" size="small" @click="handleEdit(scope)">編輯</el-button>
-          <el-button type="danger" size="small" @click="handleDelete(scope)">刪除</el-button>
+          <el-button v-if="scope.row.role_tag !== 'admin'" type="primary" size="small" @click="handleEdit(scope)">編輯</el-button>
+          <el-button v-if="scope.row.role_tag !== 'admin'" type="danger" size="small" @click="handleDelete(scope)">刪除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -122,16 +117,7 @@ export default {
       }
       return res
     },
-    async getRole() {
-      const res = await getRole()
-      this.rolesList = [...res.data]
-      for (const role of this.rolesList) {
-        role.permission = []
-        for (const permissionTag of role.allow_permissions) {
-          role.permission.push(this.permissionList[permissionTag])
-        }
-      }
-    },
+    // 取得權限群組
     async getPermission() {
       const res = await getPermission()
       this.permissionList = {}
@@ -139,6 +125,22 @@ export default {
         this.permissionList[item.permission_tag] = item
       }
       this.getRole()
+    },
+    // 取得角色群組
+    async getRole() {
+      const res = await getRole()
+      // 排除admin最高權限的帳戶
+      // this.rolesList = res.data.filter(item => {
+      //   if (item.role_tag === 'admin') return false
+      //   return true
+      // })
+      this.rolesList = [...res.data]
+      for (const role of this.rolesList) {
+        role.permission = []
+        for (const permissionTag of role.allow_permissions) {
+          role.permission.push(this.permissionList[permissionTag])
+        }
+      }
     },
     handleAddRole() {
       this.role = this.defaultData(this.PermissionData)
@@ -169,13 +171,33 @@ export default {
         type: 'warning'
       })
         .then(async() => {
-          console.log(row)
-          await deleteRole(row)
-          if (typeof row.permission === 'object') {
-            row.permission.map(async(item) => {
-              await deletePermission(item)
-            })
-          }
+          await deleteRole(row).then(async response => {
+            // 刪除角色成功
+            if (response.code === 200) {
+              if (typeof row.permission === 'object') {
+                row.permission.map(async(item) => {
+                  // 刪除權限群組
+                  await deletePermission(item).then(res => {
+                    if (res.code === 200) {
+                      this.$notify({ title: '成功', message: '角色權限已刪除', type: 'success', duration: 2000 })
+                    } else {
+                      if (typeof res.message !== 'undefined') {
+                        this.$notify({ title: '失敗', message: res.message, type: 'error', duration: 2000 })
+                      } else {
+                        this.$notify({ title: '失敗', message: '刪除失敗(' + res.code + ')', type: 'error', duration: 2000 })
+                      }
+                    }
+                  })
+                })
+              }
+            } else {
+              if (typeof response.message !== 'undefined') {
+                this.$notify({ title: '失敗', message: response.message, type: 'error', duration: 2000 })
+              } else {
+                this.$notify({ title: '失敗', message: '刪除失敗(' + response.code + ')', type: 'error', duration: 2000 })
+              }
+            }
+          })
           this.getPermission()
         })
         .catch(err => { console.error(err) })

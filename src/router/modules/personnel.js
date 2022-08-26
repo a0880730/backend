@@ -31,16 +31,16 @@ const personnelRouter = {
         title: '角色權限',
         roles: ['admin']
       }
+    },
+    {
+      path: 'salary',
+      component: () => import('@/views/personnel/salary'),
+      name: 'Salary',
+      meta: {
+        title: '薪資記錄',
+        roles: ['admin']
+      }
     }
-    // {
-    //   path: 'permission',
-    //   component: () => import('@/views/personnel/permission'),
-    //   name: 'Permission',
-    //   meta: {
-    //     title: '權限群組',
-    //     roles: ['admin']
-    //   }
-    // }
     // {
     //   path: 'count-salary',
     //   component: () => import('@/views/personnel/index'),
@@ -49,13 +49,13 @@ const personnelRouter = {
     //     title: '薪資計算',
     //     roles: ['admin']
     //   }
-    // },
+    // }
     // {
-    //   path: 'record-salary',
-    //   component: () => import('@/views/personnel/index'),
-    //   name: 'recordSalary',
+    //   path: 'permission',
+    //   component: () => import('@/views/personnel/permission'),
+    //   name: 'Permission',
     //   meta: {
-    //     title: '薪資記錄',
+    //     title: '權限群組',
     //     roles: ['admin']
     //   }
     // }

@@ -170,7 +170,6 @@ export default {
       this.mode = 'read'
       this.ShippingItem.CtrlBtn = {}
     } else { // 新增
-      this.getShipping()
       // Add Button listener
       this.ShippingItem.CtrlBtn = { label: '操作', list: 99, width: '230px', button: [
         { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick },
@@ -311,6 +310,10 @@ export default {
   margin-top: 5px;
   font-size: 14px;
   color: #AAA;
+}
+
+.is-active .brick-date{
+  color: #FFF;
 }
 
 .stock_txt{

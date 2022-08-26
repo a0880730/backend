@@ -4,7 +4,7 @@
     <FilterContainer
       :table-format="tableFormat"
       :list-query.sync="listQuery"
-      :nwe-btn="newPersonnalClick"
+      :nwe-btn="newSalaryClick"
       @get-list="getList"
     />
 
@@ -26,12 +26,11 @@
 </template>
 
 <script>
-import { getInfo, newUser, updateUser } from '@/api/user'
+import { getSalary, newSalary } from '@/api/user'
 import { mapState, mapGetters } from 'vuex'
-import { getRole } from '@/api/role'
 
 export default {
-  name: 'PersonnelList',
+  name: 'SalaryList',
   components: {},
   data() {
     return {
@@ -48,49 +47,55 @@ export default {
   },
   computed: {
     ...mapState({
-      PersonnelData: state => state.user.PersonnelData,
-      rules: state => state.user.rules
+      salaryData: state => state.user.salaryData,
+      // rules: state => state.user.rules
     }),
     ...mapGetters([
-      'defaultData'
+      'defaultData',
+      'timeToFormat',
+      'timeToRFC'
     ])
   },
   created() {
-    this.tableFormat = this.PersonnelData
+    this.tableFormat = this.salaryData
+    const today = new Date()
+    let month = today.getMonth()
+    if (month === 0) month = 12
+    const firstDay = new Date(today.getFullYear() + '-' + month + '-01 00:00:00')
+    this.tableFormat.month.default = today.getFullYear() + '-' + (month)
+    this.tableFormat.start_at.default = this.timeToFormat(firstDay)
+    firstDay.setMonth(firstDay.getMonth() + 1)
+    firstDay.setSeconds(firstDay.getSeconds() - 1)
+    this.tableFormat.end_at.default = this.timeToFormat(firstDay)
     // Add Button listener
-    this.tableFormat.CtrlBtn = { label: '操作', list: 99, width: '230px', button: [
-      { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick }
-    ]
-    }
-    this.getRole()
+    // this.tableFormat.CtrlBtn = { label: '操作', list: 99, width: '230px', button: [
+    //   { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick }
+    // ]
+    // }
     this.getList()
   },
   methods: {
-    getRole() {
-      getRole().then((response) => {
-        this.tableFormat.role.colType.data = []
-        for (const item of response.data) {
-          if (item.role_tag === 'admin') continue
-          this.tableFormat.role.colType.data.push(item.role_tag)
-        }
-      })
-    },
     getList() {
       this.listLoading = true
       var paras = {}
       paras = Object.assign({}, this.listQuery)
-      getInfo(paras).then((response) => {
-        this.list = response.data
-        this.total = response.pages.total_records
+      getSalary(paras).then((response) => {
+        if (response.data === 'object') {
+          this.total = this.list.length
+          this.list = response.data
+        } else {
+          this.list = []
+          this.total = 0
+        }
         this.listLoading = false
       })
     },
-    newPersonnalClick() {
+    newSalaryClick() {
       const dialogData = {}
       dialogData.dialogName = '新增'
       dialogData.tableFormat = { ...this.tableFormat }
       dialogData.dialogFormVisible = true
-      dialogData.temp = this.defaultData(this.PersonnelData)
+      dialogData.temp = this.defaultData(this.salaryData)
       dialogData.rules = this.rules
       dialogData.submitEvent = this.newData
       this.dialogData = dialogData
@@ -112,11 +117,17 @@ export default {
     },
     // 新增資料
     newData(paras) {
-      newUser(paras)
-        .then(() => {
-          // 重新取得清單
-          this.getList()
-          this.dialogData.dialogFormVisible = false
+      paras.yesr = paras.month.split('-')[0]
+      paras.month = paras.month.split('-')[1]
+      paras.start_at = this.timeToRFC(paras.start_at)
+      paras.end_at = this.timeToRFC(paras.end_at)
+      console.log(paras)
+      newSalary(paras)
+        .then((response) => {
+          console.log(response)
+          // // 重新取得清單
+          // this.getList()
+          // this.dialogData.dialogFormVisible = false
           this.$notify({ title: '成功', message: '資料新增成功', type: 'success', duration: 2000 })
         })
         .catch(() => {
@@ -125,16 +136,16 @@ export default {
     },
     // 更新資料
     updateData(paras) {
-      updateUser(paras)
-        .then(() => {
-          // 重新取得清單
-          this.getList()
-          this.dialogData.dialogFormVisible = false
-          this.$notify({ title: '成功', message: '資料更新成功', type: 'success', duration: 2000 })
-        })
-        .catch(() => {
-          this.$notify({ title: '失敗', message: '資料更新失敗', type: 'error', duration: 2000 })
-        })
+      // updateUser(paras)
+      //   .then(() => {
+      //     // 重新取得清單
+      //     this.getList()
+      //     this.dialogData.dialogFormVisible = false
+      //     this.$notify({ title: '成功', message: '資料更新成功', type: 'success', duration: 2000 })
+      //   })
+      //   .catch(() => {
+      //     this.$notify({ title: '失敗', message: '資料更新失敗', type: 'error', duration: 2000 })
+      //   })
     }
   }
 }

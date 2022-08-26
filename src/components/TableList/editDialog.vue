@@ -55,6 +55,11 @@
             </el-select>
           </el-form-item>
 
+          <!--4:單純顯示項目-->
+          <el-form-item v-else-if="item.edit === 4" :key="index" :label="item.label" :prop="index" :label-width="labelWidth">
+            {{ thisData.temp[index] }}
+          </el-form-item>
+
           <!--5:跟隨選項類型-->
           <el-form-item v-else-if="item.edit === 5" :key="index" :label="item.label" :prop="index" :label-width="labelWidth">
             <el-select
@@ -73,11 +78,12 @@
 
           <!--6:時間選擇器-->
           <el-form-item v-else-if="item.edit === 6" :key="index" :label="item.label" :prop="index" :label-width="labelWidth">
-            <v-date-picker v-model="thisData.temp[index]" mode="dateTime" is24hr>
+            <el-date-picker v-model="thisData.temp[index]" :type="item.dateType?item.dateType:'datetime'" :placeholder="item.label" class="filter-item" />
+            <!-- <v-date-picker v-model="thisData.temp[index]" :mode="item.dateType?item.dateType:'dateTime'" is24hr>
               <template v-slot="{ inputValue, inputEvents }">
                 <input type="text" :value="inputValue" autocomplete="off" class="el-input__inner" v-on="inputEvents">
               </template>
-            </v-date-picker>
+            </v-date-picker> -->
           </el-form-item>
 
           <!--7:可搜尋下拉選擇框-->
