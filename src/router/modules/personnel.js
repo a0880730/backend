@@ -40,6 +40,15 @@ const personnelRouter = {
         title: '薪資記錄',
         roles: ['admin']
       }
+    },
+    {
+      path: 'salaryDetail/*',
+      component: () => import('@/views/personnel/salaryDetail'),
+      name: 'salaryDetail',
+      meta: {
+        title: '薪資明細',
+        roles: ['admin']
+      }
     }
     // {
     //   path: 'count-salary',
