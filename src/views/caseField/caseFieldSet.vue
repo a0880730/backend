@@ -1,13 +1,11 @@
 <template>
   <div class="app-container">
-
     <FilterContainer
       :table-format="tableFormat"
       :list-query.sync="listQuery"
       :nwe-btn="newPersonnalClick"
       @get-list="getList"
     />
-
     <TableList
       :list="list"
       :list-loading="listLoading"
