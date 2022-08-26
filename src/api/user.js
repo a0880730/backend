@@ -96,3 +96,25 @@ export function newSalary(data) {
     data
   })
 }
+
+// 修改試算薪資
+export function patchSalary(data) {
+  if (data.trialbalance_id == null) return
+  const trialbalance_id = data.trialbalance_id
+  delete data.trialbalance_id
+  return request({
+    url: `/personnel/salary/trial-balance/${trialbalance_id}`,
+    method: 'patch',
+    data
+  })
+}
+
+// 刪除試算薪資
+export function deleteSalary(data) {
+  if (data.trialbalance_id == null) return
+  const trialbalance_id = data.user_id
+  return request({
+    url: `/personnel/salary/trial-balance/${trialbalance_id}`,
+    method: 'delete'
+  })
+}
