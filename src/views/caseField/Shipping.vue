@@ -188,7 +188,7 @@ export default {
       paras.brick_id = brick_id
       getBrick(paras).then((response) => {
         if (brick_id == null) {
-          this.BrickList = response.data
+          this.BrickList = response.data.filter(item => item.assign_for === "")
         } else {
           this.BrickItemList = response.data.items
         }

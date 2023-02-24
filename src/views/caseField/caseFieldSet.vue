@@ -1,5 +1,8 @@
 <template>
   <div class="app-container">
+    <aside class="text-left">
+      請設定案場類型的計算高度，用來計算施工人員的薪水。
+    </aside>
     <FilterContainer
       :table-format="tableFormat"
       :list-query.sync="listQuery"
@@ -121,6 +124,7 @@ export default {
         .then(() => {
           // 重新取得清單
           this.getList()
+          this.dialogData.dialogFormVisible = false
           this.$notify({ title: '成功', message: '資料更新成功', type: 'success', duration: 2000 })
         })
         .catch(() => {

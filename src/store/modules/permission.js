@@ -37,6 +37,7 @@ export function filterAsyncRoutes(routes, permission) {
 const state = {
   routes: [],
   addRoutes: [],
+  permissions: [],
   asyncRoutes: asyncRoutes
 }
 
@@ -44,7 +45,11 @@ const mutations = {
   SET_ROUTES: (state, routes) => {
     state.addRoutes = routes
     state.routes = constantRoutes.concat(routes)
-  }
+  },
+  // 紀錄權限(判斷是否有權限時使用) - Jerry
+  SET_PERMISSIONS: (state, permissions) => {
+    state.permissions = permissions
+  },
 }
 
 const actions = {
@@ -74,6 +79,7 @@ const actions = {
       } else {
         accessedRoutes = filterAsyncRoutes(asyncRoutes, permissions)
       }
+      commit('SET_PERMISSIONS', permissions)
       commit('SET_ROUTES', accessedRoutes)
       resolve(accessedRoutes)
     })

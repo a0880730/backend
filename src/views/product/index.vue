@@ -25,6 +25,7 @@
 <script>
 import { getProductInfo, getTypeInfo } from '@/api/product'
 import { mapState, mapGetters } from 'vuex'
+import router from '@/router'
 
 export default {
   name: 'ProductList',
@@ -80,6 +81,20 @@ export default {
       var paras = {}
       paras = Object.assign({}, this.listQuery)
       getTypeInfo(paras).then((response) => {
+        // 判斷有沒有商品類型
+        if (response.data === null) {
+          this.$notify({
+            title: '尚未設定商品類型',
+            type: 'warning',
+            message: '請先前往設定類型！',
+            duration: 3000,
+            showClose: true,
+            onClose: function() {
+              router.push('./productType')
+            }
+          })
+        }
+
         this.typeList = response.data
         var typeItem = {}
         var specificationItem = {}
@@ -172,6 +187,7 @@ export default {
         .then((response) => {
           if (typeof response.notify === 'object') {
             this.$notify(response.notify)
+            this.getList()
           }
           if (response.code === 201) {
             this.dialogData.dialogFormVisible = false

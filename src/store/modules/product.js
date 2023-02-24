@@ -8,7 +8,7 @@ const state = {
   ProductData: {
     'product_id': { label: 'ID', default: null },
     'name': { label: '名稱', list: 0, edit: 0, default: '', search: 1 },
-    'type': { label: '類型', list: 1, edit: 1, default: 1, search: 2,
+    'type': { label: '類型', list: 1, edit: 1, default: '', search: 2,
       colType: {
         data: {}
       }
@@ -49,7 +49,7 @@ const state = {
   ProductTypeData: {
     'type_id': { label: 'ID', default: null },
     'name': { label: '名稱', list: 0, edit: 0, default: '' },
-    'specName': { label: '規格', list: -1, edit: 0 },
+    'specName': { label: '規格', list: -1, edit: 9 },
     'specification': { label: '規格', list: 4, default: '',
       colType: {
         nameKey: 'name'

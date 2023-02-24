@@ -15,6 +15,8 @@ import report from './modules/report'
 import backend from './modules/backend'
 import personnel from './modules/personnel'
 import exportPage from './modules/export'
+import workTable from './modules/workTable'
+import calendar from './modules/calendar'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -100,7 +102,9 @@ export const constantRoutes = [
         meta: { title: 'Profile', icon: 'user', noCache: true }
       }
     ]
-  }
+  },
+  // 手機掃碼填表
+  workTable
 ]
 
 /**
@@ -113,6 +117,7 @@ export const asyncRoutes = [
   caseField,
   personnel,
   backend,
+  calendar,
   {
     path: '/pettyCash',
     component: Layout,
@@ -125,22 +130,6 @@ export const asyncRoutes = [
         component: () => import('@/views/pettyCash/index'),
         meta: { title: '零用金', icon: 'el-icon-coin', noCache: true },
         name: 'PettyCash'
-      }
-    ]
-    // hidden: true
-  },
-  {
-    path: '/calendar',
-    component: Layout,
-    redirect: '/calendar/index',
-    title: '行事曆',
-    name: 'CalendarMain',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/calendar/index'),
-        meta: { title: '行事曆', icon: 'el-icon-date', noCache: true },
-        name: 'Calendar'
       }
     ]
     // hidden: true

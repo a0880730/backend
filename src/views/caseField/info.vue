@@ -45,7 +45,20 @@
         </el-descriptions>
       </el-col>
     </el-row>
-    <el-row :gutter="20" style="margin-top:50px;">
+    <!-- <el-row style="margin-top:15px;">
+      <el-col :span="24">
+        <el-upload
+          action="https://jsonplaceholder.typicode.com/posts/"
+          list-type="picture-card"
+          :on-preview="handlePictureCardPreview"
+          :on-remove="handleRemove"
+          :http-request="uploadImage"
+        >
+          <i class="el-icon-plus" />
+        </el-upload>
+      </el-col>
+    </el-row> -->
+    <el-row :gutter="20" style="margin-top:20px;">
       <el-card class="box-card simple_info" style="text-align: center;">
         <el-col :span="4" class="col-item">
           <span>計算表</span>
@@ -54,6 +67,14 @@
           </div>
           <div class="unit_txt">張</div>
           <el-button class="filter-item" type="primary" @click="changeShowTable(2)">查看</el-button>
+        </el-col>
+        <el-col :span="6" class="col-item">
+          <span>報價單</span>
+          <div class="component-item">
+            {{ sumQutation | toThousandFilter }}
+          </div>
+          <div class="unit_txt">元</div>
+          <el-button class="filter-item" type="primary" @click="changeShowTable(1)">查看</el-button>
         </el-col>
         <el-col :span="4" class="col-item">
           <span>出貨</span>
@@ -72,17 +93,15 @@
           <el-button class="filter-item" type="primary" @click="changeShowTable(4)">查看</el-button>
         </el-col>
         <el-col :span="6" class="col-item">
-          <span>報價單金額</span>
+          <span>目前收款 / 應收餘額</span>
           <div class="component-item">
-            {{ sumQutation | toThousandFilter }}
-          </div>
-          <div class="unit_txt">元</div>
-          <el-button class="filter-item" type="primary" @click="changeShowTable(1)">查看</el-button>
-        </el-col>
-        <el-col :span="6" class="col-item">
-          <span>收款金額總計</span>
-          <div class="component-item">
-            {{ sumReceipts | toThousandFilter }}
+            {{ sumReceipts | toThousandFilter }} / 
+            <font 
+              :class="[
+                {'font_red': sumReceipts - sumQutation <= 0},
+                {'font_green': sumReceipts - sumQutation > 0}
+              ]"
+            >{{ (sumReceipts - sumQutation) | toThousandFilter }}</font>
           </div>
           <div class="unit_txt">元</div>
           <el-button class="filter-item" type="primary" @click="changeShowTable(5)">查看</el-button>
@@ -111,18 +130,20 @@
       </transition>
       <!-- 規格表 -->
       <transition name="el-fade-in-linear">
-        <el-col v-show="showTableIndex == 2" :span="12" :xs="24" class="tab-block">
+        <el-col v-show="showTableIndex == 2" :span="20" :xs="24" class="tab-block">
           <el-card class="box-card" body-style="padding:0px;">
             <div slot="header" class="clearfix">
               <span>石膏磚數量計算表</span>
               <router-link :to="`../brick/new?caseId=`+this.$route.params.pathMatch">
-                <el-button class="filter-item" style="float:right;" type="primary" icon="el-icon-edit">新增</el-button>
+                <el-button class="filter-item" style="float:right;" type="primary" icon="el-icon-edit">場勘填表</el-button>
               </router-link>
+              <el-button class="filter-item" style="float:right;margin-right:10px;" type="success" icon="el-icon-edit" @click="workFinish()">施工填表</el-button>
             </div>
             <div class="component-item" style="height:350px;">
               <brick-table
                 :case-id="this.$route.params.pathMatch"
                 :brick-count.sync="brickCount"
+                :reload-sw="brickReloadSw"
               />
             </div>
           </el-card>
@@ -191,7 +212,7 @@
 
 <script>
 import { getProductInfo, postProductPurchase, getProductRecord } from '@/api/product'
-import { newReceipts, getCaseShipping } from '@/api/caseField'
+import { newReceipts, getCaseShipping, insertFinishBrick } from '@/api/caseField'
 import QutationTable from './components/QutationTable.vue'
 import BrickTable from './components/BrickTable.vue'
 import ShippingTable from './components/ShippingTable.vue'
@@ -224,6 +245,7 @@ export default {
       },
       miscReloadSw: false,
       receiptsReloadSw: false,
+      brickReloadSw: false,
       sumQutation: 0, // 報價單總額
       shippingCount: 0, // 出貨次數
       brickCount: 0, // 記算表張數
@@ -241,12 +263,26 @@ export default {
       PurchaseData: state => state.caseField.PurchaseData,
       PurchaseDataRules: state => state.caseField.PurchaseDataRules,
       ReceiptsData: state => state.caseField.ReceiptsData,
-      ReceiptsDataRules: state => state.caseField.ReceiptsDataRules
+      ReceiptsDataRules: state => state.caseField.ReceiptsDataRules,
+      WorkFinishBrick: state => state.caseField.WorkFinishBrick,
+      PersonnelDataList: state => state.user.PersonnelDataList,
+      WorkFinishBrickRules: state => state.caseField.WorkFinishBrickRules
     }),
     ...mapGetters([
       'defaultData'
-    ])
+    ]),
+    PersonnelSelectData() {
+      const userData = []
+      for (const i in this.PersonnelDataList) {
+        var item = {}
+        item.value = i
+        item.label = this.PersonnelDataList[i].username
+        userData.push(item)
+      }
+      return userData
+    }
   },
+  watch: {},
   created() {
     this.getList()
     // 取得出貨紀錄(為了知道餘料回收時該顯示那些商品)
@@ -372,6 +408,7 @@ export default {
         this.$notify({ title: '失敗', message: '操作失敗', type: 'error', duration: 2000 })
       })
     },
+    // 新增收款
     newReceipts() {
       var dialogData = {}
       dialogData.dialogName = '新增'
@@ -426,6 +463,42 @@ export default {
             this.$router.replace('/caseField/list')
           })
       })
+    },
+    // 施工完成填表
+    workFinish() {
+      const WorkFinishBrick = { ...this.WorkFinishBrick }
+      const PersonnelSelectData = this.PersonnelSelectData.filter(item => {
+        if (item.label !== 'qrbrick') {
+          return true
+        }
+        return false
+      })
+
+      WorkFinishBrick.assign_for.selectData = PersonnelSelectData
+
+      var dialogData = {}
+      dialogData.dialogName = '施工人員填寫計算表'
+      dialogData.tableFormat = WorkFinishBrick
+      dialogData.dialogFormVisible = true
+      dialogData.temp = this.defaultData(WorkFinishBrick)
+      dialogData.rules = this.WorkFinishBrickRules
+      dialogData.submitEvent = this.workFinishSubmit
+      this.dialogData = dialogData
+    },
+    // 施工計算表資料送出
+    workFinishSubmit(paras) {
+      paras.case_id = this.$route.params.pathMatch
+      insertFinishBrick(paras).then((response) => {
+        this.dialogData.dialogFormVisible = false
+        this.brickReloadSw = !this.brickReloadSw
+        this.$notify({ title: '成功', message: '施工表新增成功！', type: 'success', duration: 2000 })
+      }).catch(() => {
+        this.$notify({ title: '失敗', message: '操作失敗', type: 'error', duration: 2000 })
+      })
+    },
+    uploadImage(v) {
+      // TODO 上傳圖片
+      console.log(v)
     }
   }
 }
@@ -488,4 +561,11 @@ export default {
   }
 }
 
+.font_green{
+  color: #52c552;
+}
+.font_red{
+  font-weight: bold;
+  color: #FF1100;
+}
 </style>

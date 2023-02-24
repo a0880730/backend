@@ -151,6 +151,7 @@ export default {
       this.dialogVisible = true
     },
     handleEdit(scope) {
+      console.log(scope)
       this.dialogType = 'edit'
       this.dialogVisible = true
       this.role = deepClone(scope.row)
@@ -161,6 +162,7 @@ export default {
             rolePermission.push({ 'name': item })
           })
         }
+        console.log(rolePermission)
         this.$refs.tree.setCheckedNodes(rolePermission)
       })
     },
@@ -204,6 +206,7 @@ export default {
     },
     async confirmRole() {
       const checkedNodes = this.$refs.tree.getCheckedNodes()
+      console.log(checkedNodes)
       const routes = []
       for (const i in checkedNodes) {
         routes.push(checkedNodes[i].name)

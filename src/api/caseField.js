@@ -120,6 +120,24 @@ export function newBrick(paras) {
   })
 }
 
+// 修改石膏磚數量表
+export function updateBrick(paras) {
+  // 擷取案場ID
+  let case_id = ''
+  if (paras.case_id != null) {
+    case_id = paras.case_id
+    delete paras.case_id
+  }
+  const brick_id = paras.brick_id
+  delete paras.brick_id
+  var data = paras
+  return request({
+    url: '/case/' + case_id + '/brick/' + brick_id,
+    method: 'patch',
+    data
+  })
+}
+
 // 刪除石膏磚數量表
 export function deleteBrick(paras) {
   // 擷取案場ID
@@ -272,5 +290,16 @@ export function deleteBrickRange(paras) {
   return request({
     url: `/personnel/cases/brickrange/${range_id}`,
     method: 'delete'
+  })
+}
+
+// 新增案場計算表給施工人員
+export function insertFinishBrick(paras) {
+  const case_id = paras.case_id
+  delete paras.case_id
+  return request({
+    url: `/case/${case_id}/ots-brick`,
+    method: 'post',
+    data: paras
   })
 }

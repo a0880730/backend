@@ -1,11 +1,16 @@
 <template>
   <div class="app-container">
+
+    <div v-if="!isQREnter" class="casefield_name">
+      {{ caseFieldData.name }} - 施工填表
+    </div>
+
     <FilterContainer
       :table-format="BrickItem"
       :list-query.sync="listQuery"
       :nwe-btn=" (mode == 'creat')?newItemClick:null"
     />
-
+  
     <el-table
       :key="tableKey"
       v-loading="listLoading"
@@ -41,9 +46,17 @@
         <div class="total-div">
           <label>總計</label>
           <span class="total-amount">{{ countTotal | toThousandFilter }}</span>
+          <label>M²</label>
         </div>
         <el-button v-if="mode == 'creat'" class="filter-item" type="primary" @click="submitQuotation()">
           送出
+        </el-button>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col class="tab-block">
+        <el-button v-if="brickData.status == 2 && isQREnter" class="filter-item" type="success" @click="submitReview()">
+          審核
         </el-button>
       </el-col>
     </el-row>
@@ -54,7 +67,7 @@
 </template>
 
 <script>
-import { getBrick } from '@/api/caseField'
+import { getBrick,getInfo } from '@/api/caseField'
 import { mapState, mapGetters } from 'vuex'
 import BrickEditDialog from './components/BrickEditDialog.vue'
 
@@ -66,6 +79,14 @@ export default {
   data() {
     return {
       list: [],
+      caseFieldData: {
+        customer: {
+          company_name: ''
+        },
+        contractor: {
+          company_name: ''
+        }
+      },
       tableKey: true,
       total: 0,
       listLoading: true,
@@ -77,7 +98,8 @@ export default {
       editRowIndex: null,
       brickData: {},
       rules: {},
-      mode: 'creat' // creat: 新增,read 查看,update 更新(目前沒有)
+      mode: 'creat', // creat: 新增,read 查看,update 更新(目前沒有)
+      isQREnter: false
     }
   },
   computed: {
@@ -92,24 +114,32 @@ export default {
       for (var i in this.list) {
         count += this.list[i].subtotal * 1
       }
+      count = parseFloat(count.toPrecision(12))
+      count = Math.trunc(count * 1000) / 1000
       return count
     }
   },
   created() {
-    this.list = []
-    if (this.$route.params.pathMatch !== 'new') {
-      this.mode = 'read'
-      this.getList()
-      this.BrickItem.CtrlBtn = {}
-    } else {
-      // Add Button listener
-      this.BrickItem.CtrlBtn = { label: '操作', list: 99, width: '230px', button: [
-        { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick }
-      ]
-      }
-      this.mode = 'creat'
-      this.listLoading = false
+    const thisRouter = this.$route.path.split('/')
+    if (!thisRouter.find(item => item === 'qrbrick')) {
+      this.isQREnter = true
     }
+
+    this.list = []
+    // if (this.$route.params.pathMatch !== 'new') {
+    this.mode = 'read'
+    this.getList()
+    this.geCaseField()
+    this.BrickItem.CtrlBtn = {}
+    // } else {
+    // Add Button listener
+    this.BrickItem.CtrlBtn = { label: '操作', list: 99, width: '230px', button: [
+      { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick }
+    ]
+    }
+    this.mode = 'creat'
+    this.listLoading = false
+    // }
   },
   methods: {
     getList() {
@@ -119,9 +149,21 @@ export default {
       paras.case_id = this.$route.query.caseId
       paras.brick_id = this.$route.params.pathMatch
       getBrick(paras).then((response) => {
-        this.brickData = response.data
-        this.list = [...this.brickData.items]
+        this.list = []
+        if (response.code === 200) {
+          this.brickData = response.data
+          this.list = [...this.brickData.items]
+        }
         this.listLoading = false
+      })
+    },
+    geCaseField() {
+      this.listLoading = true
+      var paras = {}
+      paras = Object.assign({}, this.listQuery)
+      paras.case_id = this.$route.query.caseId
+      getInfo(paras).then((response) => {
+        this.caseFieldData = response.data
       })
     },
     newItemClick() {
@@ -169,21 +211,58 @@ export default {
         })
         return false
       }
+      // 全部轉字串
+      this.list = this.list.map(data => {
+        for (let i in data) {
+          data[i] += ''
+        }
+        return data
+      })
       var paras = {}
       paras.case_id = this.$route.query.caseId
       paras.items = [...this.list]
       paras.total = this.countTotal + ''
-      this.$store.dispatch('caseField/newBrick', paras)
+      let postUrl = 'caseField/newBrick'
+      if (this.$route.params.pathMatch !== 'new') {
+        paras.brick_id = this.$route.params.pathMatch
+        postUrl = 'caseField/updateBrick'
+        if (!this.isQREnter) {
+          paras.status = 2
+        }
+      }
+      this.$store.dispatch(postUrl, paras)
         .then(() => {
-          // 回到案場
-          this.$router.replace('/caseField/info/' + this.$route.query.caseId)
+          if (this.isQREnter) {
+            // 回到案場
+            this.$router.replace('/caseField/info/' + this.$route.query.caseId)
+          }
           this.$notify({
             title: '成功',
-            message: '資料新增成功',
+            message: '資料更新成功',
             type: 'success',
             duration: 2000
           })
         })
+    },
+    // 審核通過
+    submitReview() {
+      this.$confirm('確定將此計算表審核通過嗎?，確定繼續?', '提示', {
+        confirmButtonText: '確定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        var paras = {}
+        paras.case_id = this.$route.query.caseId
+        paras.brick_id = this.$route.params.pathMatch
+        paras.status = 3
+        this.$store.dispatch('caseField/updateBrick', paras)
+          .then(() => {
+            if (this.isQREnter) {
+              // 回到案場
+              this.$router.replace('/caseField/info/' + this.$route.query.caseId)
+            }
+          })
+      })
     }
   }
 }
@@ -213,5 +292,11 @@ export default {
         font-size: 20px;
       }
     }
+}
+
+.casefield_name{
+  text-align: center;
+  font-size: 30px;
+  color: #2c2c2c;
 }
 </style>

@@ -29,7 +29,7 @@ const actions = {
   newData({ commit, state }, paras) {
     return new Promise((resolve, reject) => {
       newData(paras).then(response => {
-        resolve()
+        resolve(response)
       }).catch(error => {
         reject(error)
       })

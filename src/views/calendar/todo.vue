@@ -1,7 +1,7 @@
 <template>
   <div class="text-center section">
     <aside class="text-left">
-      點擊該日期空白處，可新增當天的待辦事項。點擊待辦事項可查看詳細資料並編輯內容。
+      點擊日期上的待辦事項色塊可查看詳細資料並更改事件狀態。
     </aside>
     <v-calendar
       ref="calendar"
@@ -14,7 +14,8 @@
       :from-page.sync="fromPage"
     >
       <template v-slot:day-content="{ day, attributes }">
-        <div class="flex flex-col h-full z-10 overflow-hidden add-class" title="點擊新增事件" @click="newData(day)">
+        <!-- <div class="flex flex-col h-full z-10 overflow-hidden add-class" title="點擊新增事件" @click="newData(day)"> -->
+        <div class="flex flex-col h-full z-10 overflow-hidden add-class">
           <span class="day-label text-sm text-gray-900">{{ day.day }}</span>
           <div class="flex-grow overflow-y-auto overflow-x-auto">
             <p
@@ -32,16 +33,18 @@
         </div>
       </template>
     </v-calendar>
-    <EditDialog :dialog-data="dialogData" />
+    <todoEditDialog :dialog-data="dialogData" />
   </div>
 </template>
 
 <script>
-import { getCalendar, postCalendar, updateCalendar, deleteCalendar } from '@/api/user'
+import todoEditDialog from './components/editDialog.vue'
+import { getCalendar, updateCalendar } from '@/api/user'
 import { mapState, mapGetters } from 'vuex'
 
 export default {
   components: {
+    todoEditDialog
   },
   data() {
     return {
@@ -59,6 +62,7 @@ export default {
   },
   computed: {
     ...mapState({
+      user_id: state => state.user.user_id,
       CalendarData: state => state.user.CalendarData,
       CalendarDataRules: state => state.user.CalendarDataRules,
       PersonnelDataList: state => state.user.PersonnelDataList
@@ -90,12 +94,11 @@ export default {
       deep: true
     }
   },
-  created() {
-    this.CalendarData.assign_for.selectData = this.PersonnelSelectData
-    this.getList()
-  },
   mounted() {
     this.calendar = this.$refs.calendar
+  },
+  created() {
+    this.getList()
   },
   methods: {
     getList() {
@@ -105,6 +108,7 @@ export default {
       const paras = {}
       paras.start_date = this.timeToRFC(start_at)
       paras.end_date = this.timeToRFC(end_at)
+      paras.user_id = this.user_id
       getCalendar(paras).then((response) => {
         const attributes = []
         for (const i in response.data) {
@@ -117,22 +121,16 @@ export default {
         this.attributes = attributes
       })
     },
-    newData(data) {
-      const defaultData = this.defaultData(this.CalendarData)
-      defaultData.start_at = data.date
-      defaultData.end_at = data.date
-
-      var dialogData = {}
-      dialogData.dialogName = '新增待辦事項'
-      dialogData.tableFormat = { ...this.CalendarData }
-      dialogData.dialogFormVisible = true
-      dialogData.temp = defaultData
-      dialogData.rules = this.CalendarDataRules
-      dialogData.submitEvent = this.postCalendar
-      this.dialogData = dialogData
-    },
     // 事件修改
     evenInfo(data) {
+      const formatTemp = this.CalendarData
+      
+      delete formatTemp.color
+      delete formatTemp.assign_for
+      formatTemp.name.edit = 4
+      formatTemp.notes.edit = 4
+      formatTemp.start_at.edit = 4
+      
       var dialogData = {}
       dialogData.dialogName = '編輯待辦事項'
       dialogData.tableFormat = { ...this.CalendarData }
@@ -142,18 +140,6 @@ export default {
       dialogData.submitEvent = this.updateCalendar
       dialogData.deleteEvent = this.deleteCalendar
       this.dialogData = dialogData
-    },
-    // 新增資料
-    postCalendar(paras) {
-      paras.start_at = this.timeToRFC(paras.start_at)
-      paras.end_at = paras.start_at
-      postCalendar(paras).then((response) => {
-        this.dialogData.dialogFormVisible = false
-        this.getList()
-        this.$notify({ title: '成功', message: '新增成功', type: 'success', duration: 2000 })
-      }).catch(() => {
-        this.$notify({ title: '失敗', message: '資料新增失敗', type: 'error', duration: 2000 })
-      })
     },
     // 修改資料
     updateCalendar(paras) {
@@ -165,16 +151,6 @@ export default {
         this.$notify({ title: '成功', message: '修改成功', type: 'success', duration: 2000 })
       }).catch(() => {
         this.$notify({ title: '失敗', message: '資料修改失敗', type: 'error', duration: 2000 })
-      })
-    },
-    // 刪除資料
-    deleteCalendar(paras) {
-      deleteCalendar(paras).then((response) => {
-        this.dialogData.dialogFormVisible = false
-        this.getList()
-        this.$notify({ title: '成功', message: '刪除成功', type: 'success', duration: 2000 })
-      }).catch(() => {
-        this.$notify({ title: '失敗', message: '刪除失敗', type: 'error', duration: 2000 })
       })
     },
     checkToday(day) {

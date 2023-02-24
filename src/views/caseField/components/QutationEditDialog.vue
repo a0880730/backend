@@ -125,7 +125,10 @@ export default {
     },
     countAmount() {
       if (this.thisData.temp['quantity'] != null && this.thisData.temp['unit_price'] != null) {
-        this.thisData.temp['amount'] = this.thisData.temp['quantity'] * this.thisData.temp['unit_price']
+        let amount = this.thisData.temp['quantity'] * this.thisData.temp['unit_price']
+        amount = parseFloat(amount.toPrecision(12))
+        amount = Math.round(amount)
+        this.thisData.temp['amount'] = amount
       }
     },
     handleSelect(item) {

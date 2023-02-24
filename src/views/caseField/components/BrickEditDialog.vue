@@ -1,12 +1,10 @@
 <template>
   <el-dialog :title="dialogData.dialogName" class="dialog-rwd" :visible.sync="thisData.dialogFormVisible" :close-on-click-modal="false">
-
     <el-form
       ref="dataForm"
       :rules="dialogData.rules"
       :model="thisData.temp"
     >
-
       <el-row>
         <el-col :span="12" :xs="24" style="padding:0 20px">
           <el-form-item style="margin-bottom: 40px;" label="編號">
@@ -37,11 +35,11 @@
         牆
       </el-col>
       <el-col :span="8" :xs="24" class="_item">
-        寬(M²)<br>
+        寬(M)<br>
         <input v-model="thisData.temp.width" class="el-input__inner" type="number">
       </el-col>
       <el-col :span="8" :xs="24" class="_item">
-        高(M²)<br>
+        高(M)<br>
         <input v-model="thisData.temp.height" class="el-input__inner" type="number">
       </el-col>
       <el-col :span="8" :xs="24" class="symbol _total">
@@ -56,11 +54,11 @@
     </el-row>
     <el-row v-if="door_checkbox" class="form-content">
       <el-col :span="8" :xs="24" class="_item">
-        寬(M²)<br>
+        寬(M)<br>
         <input v-model="thisData.temp.door_width" class="el-input__inner" type="number">
       </el-col>
       <el-col :span="8" :xs="24" class="_item">
-        高(M²)<br>
+        高(M)<br>
         <input v-model="thisData.temp.door_height" class="el-input__inner" type="number">
       </el-col>
       <el-col :span="8" :xs="24" class="_total _red">
@@ -75,11 +73,11 @@
     </el-row>
     <el-row v-if="window_checkbox" class="form-content">
       <el-col :span="8" :xs="24" class="_item">
-        寬(M²)<br>
+        寬(M)<br>
         <input v-model="thisData.temp.window_width" class="el-input__inner" type="number">
       </el-col>
       <el-col :span="8" :xs="24" class="_item">
-        高(M²)<br>
+        高(M)<br>
         <input v-model="thisData.temp.window_height" class="el-input__inner" type="number">
       </el-col>
       <el-col :span="8" :xs="24" class="_total _red">
@@ -139,6 +137,8 @@ export default {
     dialogData: {
       handler(value) {
         this.thisData = Object.assign({}, value)
+        this.window_checkbox = (this.thisData.temp.window_width > 0 || this.thisData.temp.window_height > 0)
+        this.door_checkbox = (this.thisData.temp.door_width > 0 || this.thisData.temp.door_checkbox > 0)
       },
       deep: true
     },
@@ -148,16 +148,16 @@ export default {
     'thisData.temp.height'() {
       this.countWallQuantity()
     },
-    'thisData.temp.door_width'() {
+    'thisData.temp.door_width'(value) {
       this.countDoorQuantity()
     },
-    'thisData.temp.door_height'() {
+    'thisData.temp.door_height'(value) {
       this.countDoorQuantity()
     },
-    'thisData.temp.window_width'() {
+    'thisData.temp.window_width'(value) {
       this.countwindowQuantity()
     },
-    'thisData.temp.window_height'() {
+    'thisData.temp.window_height'(value) {
       this.countwindowQuantity()
     },
     door_checkbox(value) {
@@ -188,20 +188,27 @@ export default {
       })
     },
     countWallQuantity() {
-      this.thisData.temp.quantity = parseFloat((this.thisData.temp.width * this.thisData.temp.height).toPrecision(12))
+      let quantity = parseFloat((this.thisData.temp.width * this.thisData.temp.height).toPrecision(12))
+      quantity = Math.trunc(quantity * 1000) / 1000
+      this.thisData.temp.quantity = quantity
       this.countSubtotal()
     },
     countDoorQuantity() {
-      this.thisData.temp.door_quantity = parseFloat((this.thisData.temp.door_width * this.thisData.temp.door_height).toPrecision(12))
+      let door_quantity = parseFloat((this.thisData.temp.door_width * this.thisData.temp.door_height).toPrecision(12))
+      door_quantity = Math.trunc(door_quantity * 1000) / 1000
+      this.thisData.temp.door_quantity = door_quantity
       this.countSubtotal()
     },
     countwindowQuantity() {
-      this.thisData.temp.window_quantity = parseFloat((this.thisData.temp.window_width * this.thisData.temp.window_height).toPrecision(12))
+      let window_quantity = parseFloat((this.thisData.temp.window_width * this.thisData.temp.window_height).toPrecision(12))
+      window_quantity = Math.trunc(window_quantity * 1000) / 1000
+      this.thisData.temp.window_quantity = window_quantity
       this.countSubtotal()
     },
     countSubtotal() {
-      this.thisData.temp.subtotal = this.thisData.temp.quantity - this.thisData.temp.door_quantity - this.thisData.temp.window_quantity
-      this.thisData.temp.subtotal = parseFloat(this.thisData.temp.subtotal.toPrecision(12))
+      let subtotal = this.thisData.temp.quantity - this.thisData.temp.door_quantity - this.thisData.temp.window_quantity
+      subtotal = Math.trunc(subtotal * 1000) / 1000
+      this.thisData.temp.subtotal = parseFloat(subtotal.toPrecision(12))
     },
     querySearch(queryString, cb) {
       var productList = this.productList
@@ -231,6 +238,12 @@ export default {
 .form-content{
   .el-input__inner{
     font-size: 22px;
+  }
+  .el-form-item__label{
+    font-size: 20px
+  }
+  .el-input__inner{
+    font-size: 18px
   }
 }
 
@@ -266,6 +279,7 @@ export default {
     left: 8px;
   }
 }
+
 </style>
 
 <style lang="sass" scoped>

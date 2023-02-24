@@ -65,8 +65,14 @@ export default {
     countAmount() {
       var count = 0
       for (var i in this.list) {
-        if (typeof this.list[i].amount === 'number') count += this.list[i].amount
+        if (typeof this.list[i].amount === 'number'){
+          count += this.list[i].amount
+        } else {
+          count += this.list[i].amount * 1
+        }
       }
+      count = parseFloat(count.toPrecision(12))
+      count = Math.trunc(count * 1000) / 1000
       return count
     }
   },

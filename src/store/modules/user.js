@@ -23,13 +23,15 @@ const state = {
     'avatar': { label: '大頭照', default: '' },
     'username': { label: '帳號', list: 0, edit: 0, default: '', search: 1 },
     'password': { label: '密碼', type: 'password', edit: 0, default: '' },
-    'role': { label: '權限', list: 3, edit: 2, default: '',
+    'role': {
+      label: '權限', list: 3, edit: 2, default: '',
       colType: {
         data: []
       }
     },
     'display_name': { label: '名稱', list: 0, edit: 0, default: '', search: 1 },
-    'status': { label: '狀態', list: 1, edit: 1, default: 1, search: 2,
+    'status': {
+      label: '狀態', list: 1, edit: 1, default: 1, search: 2,
       colType: {
         data: {
           // 0: '禁用',
@@ -42,17 +44,25 @@ const state = {
           2: 'info'
         }
       }
-    }
+    },
+    
+    'salary': { label: '支薪', list: 9, edit: 0, default: 0 },
+    'salaryStatus': { label: '是否支薪', edit: 1, default: 0, colType:{
+      data: {
+        0: '不支薪',
+        1: '支薪'
+      }
+    }}
   },
   rules: {
     username: [{ required: true, message: '帳號為必填', trigger: 'change' },
-      { min: 5, max: 20, message: '長度限制5~20個字', trigger: 'change' },
-      {
-        required: true,
-        pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9]+$/,
-        message: '帳號不支援特殊字符',
-        trigger: 'change'
-      }],
+    { min: 5, max: 20, message: '長度限制5~20個字', trigger: 'change' },
+    {
+      required: true,
+      pattern: /^[\u4e00-\u9fa5_a-zA-Z0-9]+$/,
+      message: '帳號不支援特殊字符',
+      trigger: 'change'
+    }],
     // password: [{ required: true, message: '密碼為必填', trigger: 'change' }],
     display_name: [{ required: true, message: '名稱為必填', trigger: 'change' }],
     status: [{ required: true, message: '狀態為必填', trigger: 'change' }],
@@ -62,19 +72,30 @@ const state = {
     'calendar_event_id': { label: 'id', default: '' },
     'name': { label: '待辦事項', edit: 0, default: '' },
     'assign_for': { label: '指派給', edit: 7, default: '', selectData: '' },
-    'color': { label: '底色', edit: 8, default: '#4299e1', colType: {
-      data: {
-        '#4299e1': '#4299e1',
-        '#38b2ac': '#38b2ac',
-        '#e53e3e': '#38b2ac',
-        '#ed8936': '#ed8936',
-        '#ed64a6': '#ed64a6'
+    'color': {
+      label: '底色', edit: 8, default: '#4299e1', colType: {
+        data: {
+          '#4299e1': '#4299e1',
+          '#38b2ac': '#38b2ac',
+          '#e53e3e': '#38b2ac',
+          '#ed8936': '#ed8936',
+          '#ed64a6': '#ed64a6'
+        }
       }
-    }
     },
     'start_at': { label: '時間', edit: 6, default: '' },
     'end_at': { label: '結束時間', default: '' },
-    'notes': { label: '備註', edit: 0, default: '', type: 'textarea' }
+    'notes': { label: '備註', edit: 0, default: '', type: 'textarea' },
+    'status': {
+      label: '狀態', list: 1, edit: 1, default: 1,
+      colType: {
+        data: {
+          // 0: '事件紀錄',
+          1: '待處理',
+          2: '已完成'
+        }
+      }
+    }
   },
   CalendarDataRules: {
     'name': [{ required: true, message: '待辦事項為必填', trigger: 'change' }],
@@ -97,16 +118,27 @@ const state = {
   },
   // 薪水
   salaryData: {
-    user_id: { label: '人員', list: 1, edit: -1 },
-    month: { label: '月份', list: 1, edit: 6, default: '', dateType: 'month' },
-    salary: { label: '薪資', list: 1, edit: 0, type: 'number' },
-    created_at: { label: '新增時間', list: 1, edit: -1 },
-    updated_at: { label: '修改時間', list: 1, edit: -1 },
+    user_id: { label: '人員', list: 9, edit: -1 },
+    month: { label: '月份', list: 0, edit: 6, default: '', dateType: 'month' },
+    salary: { label: '薪資', list: 7, edit: 0, type: 'number' },
+    created_at: { label: '新增時間', list: 6, edit: -1 },
+    updated_at: { label: '修改時間', list: 6, edit: -1 },
     start_at: { label: '起算時間', list: -1, edit: 6 },
     end_at: { label: '結束時間', list: -1, edit: 6 }
+  },
+
+  // 薪水
+  salaryDetail: {
+    notes: { label: '項目', list: 0, edit: 0 },
+    subtotal: { label: '薪水', list: 7, edit: 0, type: 'number', width: '200px' }
+  },
+
+  salaryDetailRules: {
+    'name': [{ required: true, message: '項目名稱為必填', trigger: 'change' }],
+    'amount': [{ required: true, message: '薪水金額為必填', trigger: 'change' },
+    { min: 0, type: 'number', message: '薪水金額錯誤', trigger: 'change' }]
   }
 }
-
 const mutations = {
   SET_TOKEN: (state, token) => {
     state.token = token
@@ -140,11 +172,17 @@ const actions = {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
-        const { data } = response
-        commit('SET_USER_ID', data.user_id)
-        commit('SET_TOKEN', data.access_token)
-        setToken(data.access_token)
-        resolve()
+        const callback = { ...response }
+        if (response.code === 201) {
+          const { data } = response
+          commit('SET_USER_ID', data.user_id)
+          commit('SET_TOKEN', data.access_token)
+          setToken(data.access_token)
+          resolve()
+        } else {
+          callback.notify = { title: '失敗', message: '登入失敗', type: 'error', duration: 2000 }
+          reject(callback)
+        }
       }).catch(error => {
         reject(error)
       })
@@ -156,7 +194,6 @@ const actions = {
     return new Promise((resolve, reject) => {
       getInfo(paras).then(response => {
         const { data } = response
-
         if (!data) {
           reject('Verification failed, please Login again.')
         }
@@ -166,7 +203,8 @@ const actions = {
         if (!role || role === '') {
           reject('getInfo: roles must be a non-null array!')
         }
-
+        
+        commit('SET_USER_ID', data.user_id)
         commit('SET_USER_DATA', data)
         commit('SET_ROLES', [role])
         resolve(data)

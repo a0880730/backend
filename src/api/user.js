@@ -80,6 +80,29 @@ export function deleteCalendar(data) {
   })
 }
 
+// 取得薪水設定
+export function getUserSalary(paras) {
+  if (paras.user_id == null) return Promise.reject('NO ID')
+  const user_id = paras.user_id
+  return request({
+    url: `/personnel/users/salary/${user_id}`,
+    method: 'get'
+  })
+}
+
+// 更新薪水設定
+export function patchUserSalary(data) {
+  if (data.user_id == null) return Promise.reject('NO ID')
+  const user_id = data.user_id
+  delete data.user_id
+  return request({
+    url: `/personnel/users/salary/${user_id}`,
+    method: 'patch',
+    data
+  })
+}
+
+
 // 取得所有試算薪資
 export function getSalary(paras) {
   return request({
@@ -92,7 +115,7 @@ export function getSalary(paras) {
 export function newSalary(data) {
   return request({
     url: '/personnel/salary/trial-balance',
-    method: 'get',
+    method: 'post',
     data
   })
 }
@@ -111,10 +134,20 @@ export function patchSalary(data) {
 
 // 刪除試算薪資
 export function deleteSalary(data) {
-  if (data.trialbalance_id == null) return
-  const trialbalance_id = data.user_id
+  if (data.salary_trial_balance_id == null) return
+  const trialbalance_id = data.salary_trial_balance_id
   return request({
     url: `/personnel/salary/trial-balance/${trialbalance_id}`,
     method: 'delete'
+  })
+}
+
+// 取得試算薪資詳細
+export function getSalaryDetail(data) {
+  if (data.salary_trial_balance_id == null) return
+  const trialbalance_id = data.salary_trial_balance_id
+  return request({
+    url: `/personnel/salary/trial-balance/${trialbalance_id}`,
+    method: 'get'
   })
 }

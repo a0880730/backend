@@ -94,7 +94,7 @@ module.exports = [
         data: {
           access_token: 'eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDYzODI1OTUsImlhdCI6MTY0NjM3NTM5NSwiaWQiOiI0YzlmMDgyYi1jODQyLTQzZTEtYWYzMy05NDY4ZTFmMDllNGIiLCJyb2xlIjoidXNlciIsInVzZXJuYW1lIjoidXNlcjAwMDEifQ.LlUICc_ell1zFo_OBExXrBxo-hFunUO5dx62v-J6m34cBx9XMpKqmo0N07TR0m_ufkto0_Y-XP0fpl9YitX0vg',
           user_id: '4c9f082b-c842-43e1-af33-9468e1f09e4b',
-          user_role: 'user'
+          user_role: 'user444'
         }
       }
     }

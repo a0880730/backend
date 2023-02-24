@@ -46,7 +46,7 @@
         <!--9:自寫方法類型-->
         <el-table-column v-else-if="item.list === 9" :key="index" align="center" :label="item.label">
           <template slot-scope="scope">
-            <span>{{ item.showMethod(scope.row) }}</span>
+            <span v-html="item.showMethod(scope.row)"></span>
           </template>
         </el-table-column>
 

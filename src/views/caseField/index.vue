@@ -21,7 +21,7 @@
       :limit.sync="listQuery.page_size"
       @pagination="getList"
     />
-    <EditDialog :dialog-data="dialogData" />
+    <NewCaseFieldDialog :dialog-data="dialogData" />
   </div>
 </template>
 
@@ -30,10 +30,13 @@
 import { getCustomerInfo } from '@/api/customer'
 import { getInfo } from '@/api/caseField'
 import { mapState, mapGetters } from 'vuex'
+import NewCaseFieldDialog from './components/newCaseField.vue'
 
 export default {
   name: 'CaseField',
-  components: {},
+  components: {
+    NewCaseFieldDialog
+  },
   data() {
     return {
       list: null,

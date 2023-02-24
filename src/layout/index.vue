@@ -6,11 +6,11 @@
       <div :class="{'fixed-header':fixedHeader}">
         <navbar />
         <tags-view v-if="needTagsView" />
+        <div v-if="showTitle()" class="page_title">
+          <span class="strip" />
+          {{ $route.meta.title }}</div>
+        <app-main />
       </div>
-      <div v-if="showTitle()" class="page_title">
-        <span class="strip" />
-        {{ $route.meta.title }}</div>
-      <app-main />
     </div>
   </div>
 </template>

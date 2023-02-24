@@ -57,7 +57,7 @@
 
           <!--4:單純顯示項目-->
           <el-form-item v-else-if="item.edit === 4" :key="index" :label="item.label" :prop="index" :label-width="labelWidth">
-            {{ thisData.temp[index] }}
+            <div style="text-align:left">{{ thisData.temp[index] }}</div>
           </el-form-item>
 
           <!--5:跟隨選項類型-->
@@ -122,9 +122,17 @@
             <span class="color_block" />
           </el-form-item>
 
+          <!--9:Tag增減-->
+          <el-form-item v-else-if="item.edit === 9" :key="index" :label="item.label" :prop="index" :label-width="labelWidth">
+            <tag-input
+              new-button-name="新增規格"
+              :tag-data.sync="thisData.temp[index]"
+            />
+          </el-form-item>
+
           <!--基本input-->
           <el-form-item v-else :key="index" :label="item.label" :prop="index" :label-width="labelWidth">
-            <el-input v-if="item.type === 'number'" v-model.number="thisData.temp[index]" />
+            <el-input v-if="item.type === 'number'" v-model="thisData.temp[index]" @blur="thisData.temp[index] = thisData.temp[index] * 1" />
             <el-input v-else-if="item.type === 'password'" v-model="thisData.temp[index]" type="password" />
             <el-input v-else-if="item.type === 'textarea'" v-model="thisData.temp[index]" type="textarea" />
             <el-input v-else v-model="thisData.temp[index]" />
@@ -146,8 +154,10 @@
 </template>
 
 <script>
+import tagInput from './editComponent/tagInput.vue'
 export default {
   name: 'EditDialog',
+  components: { tagInput },
   filters: {
   },
   props: {
@@ -160,7 +170,7 @@ export default {
   },
   data() {
     return {
-      labelWidth: '80px',
+      labelWidth: '120px',
       thisData: {}
     }
   },

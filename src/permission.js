@@ -52,20 +52,24 @@ router.beforeEach(async(to, from, next) => {
           // remove token and go to login page to re-login
           await store.dispatch('user/resetToken')
           Message.error(error || 'Has Error')
-          next(`/login?redirect=${to.path}`)
+          let otherQuery = to.fullPath.split('?')[1]
+          if(otherQuery != '') otherQuery = '&' + otherQuery
+          next(`/login?redirect=${to.path + otherQuery}`)
           NProgress.done()
         }
       }
     }
   } else {
     /* has no token*/
-
     if (whiteList.indexOf(to.path) !== -1) {
       // in the free login whitelist, go directly
       next()
     } else {
       // other pages that do not have permission to access are redirected to the login page.
-      next(`/login?redirect=${to.path}`)
+      // 其它的GET參數
+      let otherQuery = to.fullPath.split('?')[1]
+      if(otherQuery != '') otherQuery = '&' + otherQuery
+      next(`/login?redirect=${to.path + otherQuery}`)
       NProgress.done()
     }
   }

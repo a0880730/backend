@@ -48,7 +48,8 @@ const personnelRouter = {
       meta: {
         title: '薪資明細',
         roles: ['admin']
-      }
+      },
+      hidden: true
     }
     // {
     //   path: 'count-salary',

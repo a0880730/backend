@@ -1,4 +1,4 @@
-import { getInfo, newData, updateData, deleteCaseField, getQuotation, newQuotation, deleteQuotation, getBrick, newBrick, deleteBrick, newCaseShipping, newCaseMisc, newReceipts, newBrickRange, updateBrickRange, deleteBrickRange } from '@/api/caseField'
+import { getInfo, newData, updateData, deleteCaseField, getQuotation, newQuotation, deleteQuotation, getBrick, newBrick, updateBrick, deleteBrick, newCaseShipping, newCaseMisc, newReceipts, newBrickRange, updateBrickRange, deleteBrickRange } from '@/api/caseField'
 
 const state = {
 
@@ -12,7 +12,7 @@ const state = {
       }
     }},
     'name': { label: '級距名稱', list: 0, edit: 0, default: '' },
-    'construction_height_gt': { label: '高度(cm)', list: 0, edit: 0, type: 'number', default: '' },
+    'construction_height_gt': { label: '高度大於(cm)', list: 0, edit: 0, type: 'number', default: '' },
     'wage': { label: '計算起薪', list: 0, edit: 0, default: '' },
     'notes': { label: '備註', list: 0, edit: 0, default: '' }
   },
@@ -79,6 +79,14 @@ const state = {
     'window_quantity': { label: '窗洞總計(M²)', list: 0, edit: 99, default: '0' },
     'subtotal': { label: '小計(M²)', list: 0, edit: 99, default: '0' },
     'notes': { label: '備註', list: 0, edit: 0, default: '' }
+  },
+  // 石膏磚數量計算表item
+  WorkFinishBrick: {
+    'assign_for': { label: '施工人員', list: 0, edit: 7, default: '', selectData: '' },
+    'notes': { label: '備註', list: 0, edit: 0, default: '' }
+  },
+  WorkFinishBrickRules: {
+    'assign_for': [{ required: true, message: '施工人員為必填', trigger: 'change' }]
   },
   // 進出貨
   ShippingItem: {
@@ -222,6 +230,17 @@ const actions = {
   newBrick({ commit, state }, paras) {
     return new Promise((resolve, reject) => {
       newBrick(paras).then(response => {
+        resolve()
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+
+  // 新增規格表
+  updateBrick({ commit, state }, paras) {
+    return new Promise((resolve, reject) => {
+      updateBrick(paras).then(response => {
         resolve()
       }).catch(error => {
         reject(error)

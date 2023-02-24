@@ -62,6 +62,11 @@ const getters = {
     let dateString = y + '-' + m + '-' + d + ' ' + hh + ':' + mm + ':' + ss
     dateString = dateString.replace(/\s+/g, 'T') + '+08:00'
     return dateString
+  },
+
+  // 千分號
+  toThousandFilter: state => (num) => {
+    return (+num || 0).toString().replace(/^-?\d+/g, m => m.replace(/(?=(?!\b)(\d{3})+$)/g, ','))
   }
 }
 export default getters

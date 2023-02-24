@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import { getInfo, newUser, updateUser } from '@/api/user'
+import { getInfo, newUser, updateUser, getUserSalary, patchUserSalary } from '@/api/user'
 import { mapState, mapGetters } from 'vuex'
 import { getRole } from '@/api/role'
 
@@ -52,11 +52,21 @@ export default {
       rules: state => state.user.rules
     }),
     ...mapGetters([
-      'defaultData'
+      'defaultData',
+      'toThousandFilter'
     ])
   },
   created() {
     this.tableFormat = this.PersonnelData
+    // custom show
+    const _this = this
+    this.tableFormat.salary.showMethod = function(scop){
+      if (scop.salaryStatus == 1) {
+        return _this.toThousandFilter(scop.salary)
+      } 
+      return "<i class='el-icon-error'></i>"
+    }
+
     // Add Button listener
     this.tableFormat.CtrlBtn = { label: '操作', list: 99, width: '230px', button: [
       { label: '編輯', type: 'primary', size: 'mini', callMethod: this.editItemClick }
@@ -75,14 +85,31 @@ export default {
         }
       })
     },
-    getList() {
+    async getList() {
       this.listLoading = true
       var paras = {}
       paras = Object.assign({}, this.listQuery)
-      getInfo(paras).then((response) => {
+      await getInfo(paras).then(async(response) => {
+        for(let i in response.data){
+          const salaryParas = {}
+          salaryParas.user_id = response.data[i].user_id
+          await getUserSalary(salaryParas).then(salaryData => {
+            response.data[i].salary = 0
+            response.data[i].salaryStatus = 0
+            if (salaryData.code === 200) {
+              const userSalary = salaryData.data
+              response.data[i].salary = userSalary.salary
+              response.data[i].salaryStatus = userSalary.status
+            }
+          })
+        }
+        return response
+      }).then(response => {
         this.list = response.data
         this.total = response.pages.total_records
         this.listLoading = false
+      }).catch(error => {
+        console.error(error)
       })
     },
     newPersonnalClick() {
@@ -125,20 +152,41 @@ export default {
     },
     // 更新資料
     updateData(paras) {
-      updateUser(paras)
+      new Promise((resolve, reject) => {
+        const updateParas = {...paras}
+        updateUser(updateParas)
         .then(() => {
           // 重新取得清單
           this.getList()
           this.dialogData.dialogFormVisible = false
-          this.$notify({ title: '成功', message: '資料更新成功', type: 'success', duration: 2000 })
+          resolve(resolve, reject)
         })
-        .catch(() => {
-          this.$notify({ title: '失敗', message: '資料更新失敗', type: 'error', duration: 2000 })
-        })
+      }).then((resolve, reject)=>{
+        // 薪水更新
+        const salaryParas = {}
+        salaryParas.user_id = paras.user_id
+        salaryParas.status = paras.salaryStatus
+        salaryParas.salary = paras.salary
+        patchUserSalary(salaryParas).then(() => {
+          resolve()
+        })  
+      }).then(()=>{
+        this.$notify({ title: '成功', message: '資料更新成功', type: 'success', duration: 2000 })
+      }).catch(error=>{
+        this.$notify({ title: '失敗', message: '資料更新失敗', type: 'error', duration: 2000 })
+        console.log('err',error)
+      })      
     }
   }
 }
 </script>
+
+<style>
+  .el-icon-error{
+    color: rgb(231, 0, 0);
+    font-size: 20px;
+  }
+</style>
 
 <style scoped>
 .edit-input {

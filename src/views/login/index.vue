@@ -119,6 +119,15 @@ export default {
     } else if (this.loginForm.password === '') {
       this.$refs.password.focus()
     }
+    if (this.$route.query.redirect !== 'undefined') {
+      const redirect = this.$route.query.redirect.split('/')
+      // 是QR填表的路由
+      if (redirect.find(item => item === 'qrbrick')) {
+        this.loginForm.username = 'qrbrick'
+        this.loginForm.password = 'qrbrick'
+        this.handleLogin()
+      }
+    }
   },
   destroyed() {
     // window.removeEventListener('storage', this.afterQRScan)
@@ -147,7 +156,10 @@ export default {
               this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
               this.loading = false
             })
-            .catch(() => {
+            .catch((response) => {
+              if (typeof response.notify === 'object') {
+                this.$notify(response.notify)
+              }
               this.loading = false
             })
         } else {

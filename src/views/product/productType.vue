@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <FilterContainer
-      :table-format="BrickItem"
+      :table-format="tableFormat"
       :list-query.sync="listQuery"
       :nwe-btn="newPersonnalClick"
     />
